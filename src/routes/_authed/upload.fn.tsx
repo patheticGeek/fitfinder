@@ -6,6 +6,7 @@ import path from "path";
 import pdfParse from "pdf-parse";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
+import { zodToJsonSchema } from "zod-to-json-schema";
 
 type UploadInput = {
   fileName: string;
@@ -58,13 +59,25 @@ export const uploadResumeFn = createServerFn({ method: "POST" })
       const pdf = await pdfParse(buf);
       const text = (pdf.text || "").replace(/\s+/g, " ").trim();
 
-      const score = computeMatchScore(text, jobDescription || "");
-      const questions = await generateQuestionsFallback(
+      if (!process.env.GEMINI_API_KEY) {
+        return {
+          error: true,
+          message:
+            "GEMINI_API_KEY is required to generate structured match and questions.",
+        };
+      }
+
+      const geminiOut = await generateMatchAndQuestionsWithGemini(
         text,
         jobDescription || ""
       );
 
-      return { id, path: `/uploaded/${id}/resume.pdf`, score, questions };
+      return {
+        id,
+        path: `/uploaded/${id}/resume.pdf`,
+        score: geminiOut.score,
+        questions: geminiOut.questions,
+      };
     } catch (err: any) {
       // Return a simple error object to avoid the server runtime attempting
       // to inspect complex error shapes which can cause util.inspect failures.
@@ -87,38 +100,61 @@ function computeMatchScore(resumeText: string, jobDescription: string) {
   return Math.round((matches / jdTokens.length) * 100);
 }
 
-async function generateQuestionsFallback(
+const GeminiStructuredSchema = z.object({
+  score: z.number().min(0).max(100),
+  questions: z.array(
+    z.object({
+      text: z.string(),
+      topic: z.string().optional(),
+      confidence: z.number().min(0).max(1).optional(),
+    })
+  ),
+});
+
+async function generateMatchAndQuestionsWithGemini(
   resumeText: string,
   jobDescription: string
 ) {
   if (!process.env.GEMINI_API_KEY) {
-    throw new Error(
-      "GEMINI_API_KEY must be set to generate questions using the @google/genai SDK."
-    );
+    throw new Error("GEMINI_API_KEY must be set to call Gemini.");
   }
 
-  const prompt = `Generate 5 short interview questions to test a candidate's knowledge based on the following resume and job description. Resume:\n${resumeText}\n\nJob Description:\n${jobDescription}`;
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-  // Try a few common client surfaces for different SDK versions
+  const prompt = `
+  Generate a match score and 5 short interview questions to test a candidate's knowledge based on the following resume and job description.
+  <resume>\n${resumeText}\n</resume>
+  <job-description>\n${jobDescription}\n</job-description>
+  `.trim();
+
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const resp = await ai.models.generateContent({
       model: "gemini-flash-lite-latest",
       contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: zodToJsonSchema(GeminiStructuredSchema),
+      },
     });
 
-    const out =
+    let out =
       resp?.text || resp?.candidates?.map((c) => c?.content).join("\n") || "";
 
     if (!out) throw new Error("@google/genai returned empty output.");
 
-    return out
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const validated = GeminiStructuredSchema.parse(JSON.parse(out));
+
+    // Normalize questions to expected shape (strings -> objects)
+    const questions = validated.questions.map((q: any) => ({
+      text: String(q.text),
+      topic: q.topic ? String(q.topic) : undefined,
+      confidence: typeof q.confidence === "number" ? q.confidence : undefined,
+    }));
+
+    return { score: Math.round(validated.score), questions };
   } catch (e: any) {
     throw new Error(
-      `@google/genai invocation failed: ${e?.message || String(e)}`
+      `@google/genai invocation/parse failed: ${e?.message || String(e)}`
     );
   }
 }

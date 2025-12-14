@@ -11,8 +11,6 @@ export const Route = createFileRoute("/_authed/upload")({
 function UploadPage() {
   const [jobDescription, setJobDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
 
   const mutation = useMutation({
     mutationFn: useServerFn(uploadResumeFn),
@@ -21,7 +19,7 @@ function UploadPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return alert("Please select a PDF resume");
-    setLoading(true);
+
     try {
       const base64 = (await readFileAsBase64(file)) as string;
       const contentBase64 = base64.replace(/^data:.*;base64,/, "");
@@ -35,19 +33,12 @@ function UploadPage() {
           },
         },
         {
-          onSuccess(data) {
-            setResult(data);
-          },
           onError(err: any) {
             console.log(err);
-          },
-          onSettled() {
-            setLoading(false);
           },
         }
       );
     } catch (err: any) {
-      setLoading(false);
       alert("Failed to read file: " + err.message);
     }
   };
@@ -73,46 +64,34 @@ function UploadPage() {
             onChange={(e) => setJobDescription(e.target.value)}
           />
         </div>
+
         <div>
           <button
             className="px-3 py-1 bg-blue-600 text-white rounded"
-            disabled={loading}
+            disabled={mutation.isPending}
           >
-            {loading ? "Uploading..." : "Upload and Analyze"}
+            {mutation.isPending ? "Uploading..." : "Upload and Analyze"}
           </button>
         </div>
       </form>
 
-      {mutation.data || result ? (
+      {mutation.data ? (
         <div className="mt-4 p-3 border rounded bg-gray-900">
           <div>
-            Saved id: <strong>{(mutation.data || result)?.id}</strong>
+            Saved id: <strong>{mutation.data.id}</strong>
           </div>
           <div>
-            Match Score: <strong>{(mutation.data || result)?.score}%</strong>
+            Match Score: <strong>{mutation.data.score}%</strong>
           </div>
-          {(mutation.data || result)?.path && (
-            <div>
-              Resume URL:{" "}
-              <a
-                className="text-blue-600"
-                href={`${(mutation.data || result).path}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open
-              </a>
-            </div>
-          )}
-          {(mutation.data || result)?.questions && (
+          {mutation.data.questions && (
             <div className="mt-2">
               <div className="font-semibold">Generated Questions</div>
               <ol className="list-decimal ml-6">
-                {(mutation.data || result).questions.map(
-                  (q: string, i: number) => (
-                    <li key={i}>{q}</li>
-                  )
-                )}
+                {mutation.data.questions.map((q, i) => (
+                  <li key={i}>
+                    {q.text} - {q.topic} - {q.confidence}
+                  </li>
+                ))}
               </ol>
             </div>
           )}
