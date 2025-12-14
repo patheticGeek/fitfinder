@@ -1,9 +1,9 @@
-import { PrismaLibSql } from "@prisma/adapter-libsql";
+import { PrismaPg } from "@prisma/adapter-pg";
 import crypto from "node:crypto";
 import { PrismaClient } from "~/prisma-generated/client";
 
-const adapter = new PrismaLibSql({
-  url: process.env.DATABASE_URL || "file:./prisma/dev.db",
+const adapter = new PrismaPg({
+  url: process.env.DATABASE_URL,
 });
 export const prismaClient = new PrismaClient({ adapter });
 
