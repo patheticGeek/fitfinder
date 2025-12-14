@@ -101,10 +101,6 @@ devDependencies:
     specifier: ^5.1.4
     version: 5.1.4(typescript@5.9.3)(vite@7.2.7)
 
-dependenciesMeta:
-  '@google/genai':
-    optional: true
-
 packages:
 
   /@alloc/quick-lru@5.2.0:
