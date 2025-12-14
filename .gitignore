@@ -5,6 +5,7 @@ yarn.lock
 dev.db
 
 *.env*
+!.env.sample
 .DS_Store
 .cache
 .vercel
