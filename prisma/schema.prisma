@@ -7,10 +7,10 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model User {
-  email String @id @unique
+  email    String @id @unique
   password String
 }
