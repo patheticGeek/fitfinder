@@ -2,6 +2,8 @@
 
 FitFinder helps you screen resumes, score candidate-job fit, and automatically generate short interview questions based on the candidate's resume and a job description.
 
+![Demo](./docs/demo.png)
+
 ## Getting Started
 
 1. Setup a `.env` file based on `.env.sample` and add your Gemini API key.
