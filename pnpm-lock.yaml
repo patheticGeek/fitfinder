@@ -14,6 +14,9 @@ dependencies:
   '@prisma/client':
     specifier: ^7.0.0
     version: 7.1.0(prisma@7.1.0)(typescript@5.9.3)
+  '@tanstack/react-query':
+    specifier: ^5.0.0
+    version: 5.90.12(react@19.2.3)
   '@tanstack/react-router':
     specifier: ^1.141.2
     version: 1.141.2(react-dom@19.2.3)(react@19.2.3)
@@ -1603,6 +1606,19 @@ packages:
   /@tanstack/history@1.141.0:
     resolution: {integrity: sha512-LS54XNyxyTs5m/pl1lkwlg7uZM3lvsv2FIIV1rsJgnfwVCnI+n4ZGZ2CcjNT13BPu/3hPP+iHmliBSscJxW5FQ==}
     engines: {node: '>=12'}
+    dev: false
+
+  /@tanstack/query-core@5.90.12:
+    resolution: {integrity: sha512-T1/8t5DhV/SisWjDnaiU2drl6ySvsHj1bHBCWNXd+/T+Hh1cf6JodyEYMd5sgwm+b/mETT4EV3H+zCVczCU5hg==}
+    dev: false
+
+  /@tanstack/react-query@5.90.12(react@19.2.3):
+    resolution: {integrity: sha512-graRZspg7EoEaw0a8faiUASCyJrqjKPdqJ9EwuDRUF9mEYJ1YPczI9H+/agJ0mOJkPCJDk0lsz5QTrLZ/jQ2rg==}
+    peerDependencies:
+      react: ^18 || ^19
+    dependencies:
+      '@tanstack/query-core': 5.90.12
+      react: 19.2.3
     dev: false
 
   /@tanstack/react-router-devtools@1.141.2(@tanstack/react-router@1.141.2)(@tanstack/router-core@1.141.2)(csstype@3.2.3)(react-dom@19.2.3)(react@19.2.3)(solid-js@1.9.10):
