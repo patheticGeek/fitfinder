@@ -2,7 +2,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   HeadContent,
-  Link,
   Outlet,
   Scripts,
   createRootRoute,
@@ -11,6 +10,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { createServerFn } from "@tanstack/react-start";
 import * as React from "react";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary.js";
+import Header from "~/components/global/Header";
 import { NotFound } from "~/components/NotFound.js";
 import appCss from "~/styles/app.css?url";
 import { seo } from "~/utils/seo.js";
@@ -50,9 +50,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       ...seo({
-        title:
-          "TanStack Start | Type-Safe, Client-First, Full-Stack React Framework",
-        description: `TanStack Start is a type-safe, client-first, full-stack React framework. `,
+        description: `Your AI-powered resume screening tool designed to help employers find the best candidates efficiently.`,
       }),
     ],
     links: [
@@ -107,36 +105,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <QueryClientProvider client={queryClient}>
-          <div className="p-2 flex gap-2 text-lg">
-            <Link
-              to="/"
-              activeProps={{
-                className: "font-bold",
-              }}
-              activeOptions={{ exact: true }}
-            >
-              Home
-            </Link>{" "}
-            <Link
-              to="/posts"
-              activeProps={{
-                className: "font-bold",
-              }}
-            >
-              Posts
-            </Link>
-            <div className="ml-auto">
-              {user ? (
-                <>
-                  <span className="mr-2">{user.email}</span>
-                  <Link to="/logout">Logout</Link>
-                </>
-              ) : (
-                <Link to="/login">Login</Link>
-              )}
-            </div>
-          </div>
-          <hr />
+          <Header email={user?.email} />
           {children}
           <TanStackRouterDevtools position="bottom-right" />
         </QueryClientProvider>

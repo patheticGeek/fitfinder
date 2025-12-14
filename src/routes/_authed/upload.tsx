@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import React, { useState } from "react";
 import { uploadResumeFn } from "./upload.fn";
 
-export const Route = createFileRoute("/upload")({
+export const Route = createFileRoute("/_authed/upload")({
   component: UploadPage,
 });
 
@@ -52,11 +52,9 @@ function UploadPage() {
     }
   };
 
-  console.log("mutation data:", mutation.data, mutation.error);
-
   return (
     <div className="p-4 max-w-2xl">
-      <h2 className="text-xl font-bold mb-2">Upload Resume PDF</h2>
+      <h2 className="text-xl font-bold mb-2">Upload Resume</h2>
       <form onSubmit={submit} className="space-y-3">
         <div>
           <label className="block font-medium">Resume (PDF)</label>

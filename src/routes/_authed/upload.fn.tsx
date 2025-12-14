@@ -123,7 +123,7 @@ async function generateQuestionsFallback(
   }
 }
 
-export const Route = createFileRoute("/upload/fn")({
+export const Route = createFileRoute("/_authed/upload/fn")({
   component: RouteComponent,
 });
 

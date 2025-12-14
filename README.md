@@ -1,16 +1,6 @@
-# TanStack Start - Basic Auth Example
+# FitFinder
 
-A TanStack Start example demonstrating authentication patterns and protected routes.
-
-- [TanStack Router Docs](https://tanstack.com/router)
-
-## Start a new project based on this example
-
-To start a new project based on this example, run:
-
-```sh
-npx gitpick TanStack/router/tree/main/examples/react/start-basic-auth start-basic-auth
-```
+FitFinder helps you screen resumes, score candidate-job fit, and automatically generate short interview questions based on the candidate's resume and a job description.
 
 ## Getting Started
 
@@ -21,7 +11,7 @@ pnpm install
 pnpm dev
 ```
 
-This starts your app in development mode, rebuilding assets on file changes.
+This starts the app in development mode, rebuilding assets on file changes.
 
 ## Build
 
@@ -31,11 +21,9 @@ To build the app for production:
 pnpm build
 ```
 
-## Authentication Features
+## Features
 
-This example demonstrates:
-
-- User authentication flow
-- Protected routes
-- Login/logout functionality
-- Redirect after authentication
+- Upload resume PDFs and a job description
+- Compute a simple match score between resume content and job description
+- Generate interview questions using Gemini via the `@google/genai` SDK
+- Server-function architecture with TanStack Start

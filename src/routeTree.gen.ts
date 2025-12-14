@@ -9,22 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UploadRouteImport } from './routes/upload'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as UploadFnRouteImport } from './routes/upload.fn'
-import { Route as AuthedPostsRouteRouteImport } from './routes/_authed/posts.route'
-import { Route as AuthedPostsIndexRouteImport } from './routes/_authed/posts.index'
-import { Route as AuthedPostsPostIdRouteImport } from './routes/_authed/posts.$postId'
+import { Route as AuthedUploadRouteImport } from './routes/_authed/upload'
+import { Route as AuthedUploadFnRouteImport } from './routes/_authed/upload.fn'
 
-const UploadRoute = UploadRouteImport.update({
-  id: '/upload',
-  path: '/upload',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -49,25 +41,15 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UploadFnRoute = UploadFnRouteImport.update({
-  id: '/fn',
-  path: '/fn',
-  getParentRoute: () => UploadRoute,
-} as any)
-const AuthedPostsRouteRoute = AuthedPostsRouteRouteImport.update({
-  id: '/posts',
-  path: '/posts',
+const AuthedUploadRoute = AuthedUploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
   getParentRoute: () => AuthedRoute,
 } as any)
-const AuthedPostsIndexRoute = AuthedPostsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthedPostsRouteRoute,
-} as any)
-const AuthedPostsPostIdRoute = AuthedPostsPostIdRouteImport.update({
-  id: '/$postId',
-  path: '/$postId',
-  getParentRoute: () => AuthedPostsRouteRoute,
+const AuthedUploadFnRoute = AuthedUploadFnRouteImport.update({
+  id: '/fn',
+  path: '/fn',
+  getParentRoute: () => AuthedUploadRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -75,21 +57,16 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/signup': typeof SignupRoute
-  '/upload': typeof UploadRouteWithChildren
-  '/posts': typeof AuthedPostsRouteRouteWithChildren
-  '/upload/fn': typeof UploadFnRoute
-  '/posts/$postId': typeof AuthedPostsPostIdRoute
-  '/posts/': typeof AuthedPostsIndexRoute
+  '/upload': typeof AuthedUploadRouteWithChildren
+  '/upload/fn': typeof AuthedUploadFnRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/signup': typeof SignupRoute
-  '/upload': typeof UploadRouteWithChildren
-  '/upload/fn': typeof UploadFnRoute
-  '/posts/$postId': typeof AuthedPostsPostIdRoute
-  '/posts': typeof AuthedPostsIndexRoute
+  '/upload': typeof AuthedUploadRouteWithChildren
+  '/upload/fn': typeof AuthedUploadFnRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -98,34 +75,14 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/signup': typeof SignupRoute
-  '/upload': typeof UploadRouteWithChildren
-  '/_authed/posts': typeof AuthedPostsRouteRouteWithChildren
-  '/upload/fn': typeof UploadFnRoute
-  '/_authed/posts/$postId': typeof AuthedPostsPostIdRoute
-  '/_authed/posts/': typeof AuthedPostsIndexRoute
+  '/_authed/upload': typeof AuthedUploadRouteWithChildren
+  '/_authed/upload/fn': typeof AuthedUploadFnRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/login'
-    | '/logout'
-    | '/signup'
-    | '/upload'
-    | '/posts'
-    | '/upload/fn'
-    | '/posts/$postId'
-    | '/posts/'
+  fullPaths: '/' | '/login' | '/logout' | '/signup' | '/upload' | '/upload/fn'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/login'
-    | '/logout'
-    | '/signup'
-    | '/upload'
-    | '/upload/fn'
-    | '/posts/$postId'
-    | '/posts'
+  to: '/' | '/login' | '/logout' | '/signup' | '/upload' | '/upload/fn'
   id:
     | '__root__'
     | '/'
@@ -133,11 +90,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/logout'
     | '/signup'
-    | '/upload'
-    | '/_authed/posts'
-    | '/upload/fn'
-    | '/_authed/posts/$postId'
-    | '/_authed/posts/'
+    | '/_authed/upload'
+    | '/_authed/upload/fn'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -146,18 +100,10 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   LogoutRoute: typeof LogoutRoute
   SignupRoute: typeof SignupRoute
-  UploadRoute: typeof UploadRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/upload': {
-      id: '/upload'
-      path: '/upload'
-      fullPath: '/upload'
-      preLoaderRoute: typeof UploadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -193,71 +139,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/upload/fn': {
-      id: '/upload/fn'
-      path: '/fn'
-      fullPath: '/upload/fn'
-      preLoaderRoute: typeof UploadFnRouteImport
-      parentRoute: typeof UploadRoute
-    }
-    '/_authed/posts': {
-      id: '/_authed/posts'
-      path: '/posts'
-      fullPath: '/posts'
-      preLoaderRoute: typeof AuthedPostsRouteRouteImport
+    '/_authed/upload': {
+      id: '/_authed/upload'
+      path: '/upload'
+      fullPath: '/upload'
+      preLoaderRoute: typeof AuthedUploadRouteImport
       parentRoute: typeof AuthedRoute
     }
-    '/_authed/posts/': {
-      id: '/_authed/posts/'
-      path: '/'
-      fullPath: '/posts/'
-      preLoaderRoute: typeof AuthedPostsIndexRouteImport
-      parentRoute: typeof AuthedPostsRouteRoute
-    }
-    '/_authed/posts/$postId': {
-      id: '/_authed/posts/$postId'
-      path: '/$postId'
-      fullPath: '/posts/$postId'
-      preLoaderRoute: typeof AuthedPostsPostIdRouteImport
-      parentRoute: typeof AuthedPostsRouteRoute
+    '/_authed/upload/fn': {
+      id: '/_authed/upload/fn'
+      path: '/fn'
+      fullPath: '/upload/fn'
+      preLoaderRoute: typeof AuthedUploadFnRouteImport
+      parentRoute: typeof AuthedUploadRoute
     }
   }
 }
 
-interface AuthedPostsRouteRouteChildren {
-  AuthedPostsPostIdRoute: typeof AuthedPostsPostIdRoute
-  AuthedPostsIndexRoute: typeof AuthedPostsIndexRoute
+interface AuthedUploadRouteChildren {
+  AuthedUploadFnRoute: typeof AuthedUploadFnRoute
 }
 
-const AuthedPostsRouteRouteChildren: AuthedPostsRouteRouteChildren = {
-  AuthedPostsPostIdRoute: AuthedPostsPostIdRoute,
-  AuthedPostsIndexRoute: AuthedPostsIndexRoute,
+const AuthedUploadRouteChildren: AuthedUploadRouteChildren = {
+  AuthedUploadFnRoute: AuthedUploadFnRoute,
 }
 
-const AuthedPostsRouteRouteWithChildren =
-  AuthedPostsRouteRoute._addFileChildren(AuthedPostsRouteRouteChildren)
+const AuthedUploadRouteWithChildren = AuthedUploadRoute._addFileChildren(
+  AuthedUploadRouteChildren,
+)
 
 interface AuthedRouteChildren {
-  AuthedPostsRouteRoute: typeof AuthedPostsRouteRouteWithChildren
+  AuthedUploadRoute: typeof AuthedUploadRouteWithChildren
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
-  AuthedPostsRouteRoute: AuthedPostsRouteRouteWithChildren,
+  AuthedUploadRoute: AuthedUploadRouteWithChildren,
 }
 
 const AuthedRouteWithChildren =
   AuthedRoute._addFileChildren(AuthedRouteChildren)
-
-interface UploadRouteChildren {
-  UploadFnRoute: typeof UploadFnRoute
-}
-
-const UploadRouteChildren: UploadRouteChildren = {
-  UploadFnRoute: UploadFnRoute,
-}
-
-const UploadRouteWithChildren =
-  UploadRoute._addFileChildren(UploadRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -265,7 +185,6 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   LogoutRoute: LogoutRoute,
   SignupRoute: SignupRoute,
-  UploadRoute: UploadRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
