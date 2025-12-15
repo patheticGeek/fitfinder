@@ -25,6 +25,17 @@ export default function Header({ email }: { email?: string }) {
         >
           Upload
         </Link>
+        {email && (
+          <Link
+            to="/organizations"
+            activeProps={{
+              className: "font-bold",
+            }}
+            activeOptions={{ exact: true }}
+          >
+            Organizations
+          </Link>
+        )}
         <div className="ml-auto">
           {email ? (
             <>
