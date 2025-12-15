@@ -1,10 +1,11 @@
 /// <reference types="vite/client" />
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
   HeadContent,
   Outlet,
   Scripts,
-  createRootRoute,
+  createRootRouteWithContext,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { createServerFn } from "@tanstack/react-start";
@@ -13,6 +14,7 @@ import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary.js";
 import Header from "~/components/global/Header";
 import { NotFound } from "~/components/NotFound.js";
 import appCss from "~/styles/app.css?url";
+import { prismaClient } from "~/utils/prisma";
 import { seo } from "~/utils/seo.js";
 import { useAppSession } from "~/utils/session.js";
 
@@ -24,15 +26,15 @@ const fetchUser = createServerFn({ method: "GET" }).handler(async () => {
     return null;
   }
 
-  return {
-    email: session.data.userEmail,
-  };
+  return await prismaClient.user.findUnique({
+    where: { email: session.data.userEmail },
+    omit: { password: true },
+  });
 });
 
-// Single shared QueryClient for the app
-const queryClient = new QueryClient();
-
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  queryClient: QueryClient;
+}>()({
   beforeLoad: async () => {
     const user = await fetchUser();
 
@@ -104,11 +106,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <QueryClientProvider client={queryClient}>
-          <Header email={user?.email} />
-          {children}
-          <TanStackRouterDevtools position="bottom-right" />
-        </QueryClientProvider>
+        <Header email={user?.email} />
+
+        {children}
+
+        <TanStackRouterDevtools position="bottom-right" />
+        <ReactQueryDevtools buttonPosition="bottom-left" />
+
         <Scripts />
       </body>
     </html>

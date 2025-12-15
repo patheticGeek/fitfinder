@@ -4,7 +4,7 @@ import { promisify } from "node:util";
 import { PrismaClient } from "~/prisma-generated/client";
 
 const adapter = new PrismaPg({
-  url: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL,
 });
 export const prismaClient = new PrismaClient({ adapter });
 
