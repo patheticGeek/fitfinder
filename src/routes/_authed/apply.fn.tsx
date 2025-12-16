@@ -1,8 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import fs from "fs";
-import path from "path";
 import pdfParse from "pdf-parse";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
@@ -58,17 +56,9 @@ export const applyResumeFn = createServerFn({ method: "POST" })
         ? await prismaClient.user.findUnique({ where: { email: userEmail } })
         : null;
 
-      const UPLOAD_DIR = path.join(process.cwd(), "uploaded");
-      if (!fs.existsSync(UPLOAD_DIR))
-        fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-
       const id = uuidv4();
-      const destDir = path.join(UPLOAD_DIR, id);
-      fs.mkdirSync(destDir, { recursive: true });
 
       const buf = Buffer.from(contentBase64, "base64");
-      const destPath = path.join(destDir, "resume.pdf");
-      await fs.promises.writeFile(destPath, buf);
 
       const pdf = await pdfParse(buf);
       const text = (pdf.text || "").replace(/\s+/g, " ").trim();
@@ -117,20 +107,6 @@ export const applyResumeFn = createServerFn({ method: "POST" })
       return { error: true, message };
     }
   });
-
-function computeMatchScore(resumeText: string, jobDescription: string) {
-  if (!jobDescription) return 0;
-  const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9\s]/g, " ");
-  const jdTokens = Array.from(
-    new Set(normalize(jobDescription).split(/\s+/).filter(Boolean))
-  );
-  const resumeTokens = new Set(
-    normalize(resumeText).split(/\s+/).filter(Boolean)
-  );
-  if (jdTokens.length === 0) return 0;
-  const matches = jdTokens.filter((t) => resumeTokens.has(t)).length;
-  return Math.round((matches / jdTokens.length) * 100);
-}
 
 export const listJobsFn = createServerFn({ method: "GET" }).handler(
   async () => {
