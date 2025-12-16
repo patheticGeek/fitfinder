@@ -7,12 +7,16 @@ import pdfParse from "pdf-parse";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
+import { prismaClient } from "~/utils/prisma";
+import { useAppSession } from "~/utils/session";
 
 type UploadInput = {
   fileName: string;
   mimeType: string;
   contentBase64: string;
   jobDescription?: string;
+  jobId?: string;
+  orgId?: string;
 };
 
 const UploadSchema = z.object({
@@ -20,6 +24,8 @@ const UploadSchema = z.object({
   mimeType: z.string().regex(/^application\/pdf$/i),
   contentBase64: z.string().min(20),
   jobDescription: z.string().optional(),
+  jobId: z.string().optional(),
+  orgId: z.string().optional(),
 });
 
 export const uploadResumeFn = createServerFn({ method: "POST" })
@@ -38,11 +44,25 @@ export const uploadResumeFn = createServerFn({ method: "POST" })
       // Validate inside handler to avoid throwing a ZodError that the
       // dev-server runtime may attempt to inspect (which can cause the
       // observed TypeError). Use safeParse and return a simple error shape.
-      const parsed = UploadSchema.safeParse(data as any);
+      const parsed = UploadSchema.safeParse(data);
       if (!parsed.success) {
         return { error: true, message: parsed.error.message };
       }
-      const { fileName, mimeType, contentBase64, jobDescription } = parsed.data;
+      const {
+        fileName,
+        mimeType,
+        contentBase64,
+        jobDescription,
+        jobId,
+        orgId,
+      } = parsed.data;
+
+      // Attach authenticated user when possible
+      const session = await useAppSession();
+      const userEmail = session?.data?.userEmail;
+      const user = userEmail
+        ? await prismaClient.user.findUnique({ where: { email: userEmail } })
+        : null;
 
       const UPLOAD_DIR = path.join(process.cwd(), "uploaded");
       if (!fs.existsSync(UPLOAD_DIR))
@@ -72,11 +92,33 @@ export const uploadResumeFn = createServerFn({ method: "POST" })
         jobDescription || ""
       );
 
+      // Persist resume record in DB (non-fatal)
+      let resumeRecord: any = null;
+      try {
+        resumeRecord = await prismaClient.resume.create({
+          data: {
+            fileName,
+            path: `/uploaded/${id}/resume.pdf`,
+            score: geminiOut.score,
+            questions: geminiOut.questions,
+            userId: user?.id ?? undefined,
+            jobId: jobId ?? undefined,
+            organizationId: orgId ?? undefined,
+          },
+        });
+      } catch (e: any) {
+        console.warn("Failed to persist resume record:", e?.message || e);
+      }
+
+      // Return the job/org ids back so the client can associate the upload
       return {
         id,
         path: `/uploaded/${id}/resume.pdf`,
         score: geminiOut.score,
         questions: geminiOut.questions,
+        jobId: jobId ?? null,
+        orgId: orgId ?? null,
+        resumeId: resumeRecord?.id ?? null,
       };
     } catch (err: any) {
       // Return a simple error object to avoid the server runtime attempting
@@ -99,6 +141,22 @@ function computeMatchScore(resumeText: string, jobDescription: string) {
   const matches = jdTokens.filter((t) => resumeTokens.has(t)).length;
   return Math.round((matches / jdTokens.length) * 100);
 }
+
+// List jobs so the client can show selectable jobs across organizations
+export const listJobsFn = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const session = await useAppSession();
+    const userEmail = (session as any).data?.userEmail;
+    if (!userEmail) return { error: true, message: "Not authenticated" };
+
+    const jobs = await prismaClient.job.findMany({
+      include: { organization: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return { jobs };
+  }
+);
 
 const GeminiStructuredSchema = z.object({
   score: z.number().min(0).max(100),

@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { prismaClient } from "~/utils/prisma";
@@ -10,7 +10,7 @@ export const createOrganizationFn = createServerFn({ method: "POST" })
   .inputValidator((d: { name: string }) => d)
   .handler(async ({ data }) => {
     const session = await useAppSession();
-    const userEmail = (session as any).data?.userEmail;
+    const userEmail = session?.data?.userEmail;
     if (!userEmail) return { error: true, message: "Not authenticated" };
 
     const user = await prismaClient.user.findUnique({
@@ -36,7 +36,7 @@ export const createOrganizationFn = createServerFn({ method: "POST" })
 export const listOrganizationsFn = createServerFn({ method: "GET" }).handler(
   async () => {
     const session = await useAppSession();
-    const userEmail = (session as any).data?.userEmail;
+    const userEmail = session?.data?.userEmail;
     if (!userEmail) return { error: true, message: "Not authenticated" };
 
     const user = await prismaClient.user.findUnique({
@@ -62,7 +62,7 @@ export const addAdminFn = createServerFn({ method: "POST" })
   .inputValidator((d: { orgId: string; userEmail: string }) => d)
   .handler(async ({ data }) => {
     const session = await useAppSession();
-    const userEmail = (session as any).data?.userEmail;
+    const userEmail = session?.data?.userEmail;
     if (!userEmail) return { error: true, message: "Not authenticated" };
 
     const user = await prismaClient.user.findUnique({
@@ -100,10 +100,12 @@ export const addAdminFn = createServerFn({ method: "POST" })
   });
 
 export const createJobFn = createServerFn({ method: "POST" })
-  .inputValidator((d: { orgId: string; description: string }) => d)
+  .inputValidator(
+    (d: { orgId: string; title: string; description: string }) => d
+  )
   .handler(async ({ data }) => {
     const session = await useAppSession();
-    const userEmail = (session as any).data?.userEmail;
+    const userEmail = session?.data?.userEmail;
     if (!userEmail) return { error: true, message: "Not authenticated" };
 
     const user = await prismaClient.user.findUnique({
@@ -120,7 +122,11 @@ export const createJobFn = createServerFn({ method: "POST" })
       return { error: true, message: "Not authorized" };
 
     const job = await prismaClient.job.create({
-      data: { description: data.description, organizationId: data.orgId },
+      data: {
+        title: data.title,
+        description: data.description,
+        organizationId: data.orgId,
+      },
     });
 
     return { job };
@@ -132,6 +138,7 @@ export const Route = createFileRoute("/_authed/organizations")({
 
 function OrganizationsPage() {
   const [name, setName] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
   const [jobDesc, setJobDesc] = useState("");
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
 
@@ -189,7 +196,22 @@ function OrganizationsPage() {
 
       <div>
         <h3 className="font-semibold">Your Organizations</h3>
-        {listQuery.data?.orgs?.length ? (
+        {listQuery.isLoading ? (
+          <div className="space-y-3 mt-2">
+            <div className="grid grid-cols-1 gap-3 mt-2">
+              <div className="h-20 bg-gray-800 rounded animate-pulse" />
+              <div className="h-20 bg-gray-800 rounded animate-pulse" />
+              <div className="h-20 bg-gray-800 rounded animate-pulse" />
+            </div>
+          </div>
+        ) : listQuery.isError ? (
+          <div className="text-red-400">
+            Failed to load organizations.{" "}
+            <button className="underline" onClick={() => listQuery.refetch()}>
+              Retry
+            </button>
+          </div>
+        ) : listQuery.data?.orgs?.length ? (
           <ul className="space-y-3 mt-2">
             {listQuery.data.orgs.map((o: any) => (
               <li key={o.id} className="p-3 border rounded">
@@ -201,12 +223,13 @@ function OrganizationsPage() {
                     </div>
                   </div>
                   <div>
-                    <button
-                      onClick={() => setSelectedOrg(o.id)}
+                    <Link
+                      to={`/organization/$orgId`}
+                      params={{ orgId: o.id }}
                       className="px-2 py-1 bg-blue-600 text-white rounded"
                     >
                       Manage
-                    </button>
+                    </Link>
                   </div>
                 </div>
 
@@ -214,6 +237,12 @@ function OrganizationsPage() {
                   <div className="mt-3">
                     <div className="mb-2">
                       <label className="block font-medium">Add Job</label>
+                      <input
+                        value={jobTitle}
+                        onChange={(e) => setJobTitle(e.target.value)}
+                        placeholder="Job title"
+                        className="w-full border p-2 mb-2"
+                      />
                       <textarea
                         value={jobDesc}
                         onChange={(e) => setJobDesc(e.target.value)}
@@ -223,12 +252,20 @@ function OrganizationsPage() {
                         <button
                           onClick={(e) => {
                             e.preventDefault();
+                            if (!jobTitle) return alert("Enter job title");
                             if (!jobDesc) return alert("Enter job description");
                             createJobMutation.mutate(
-                              { data: { orgId: o.id, description: jobDesc } },
+                              {
+                                data: {
+                                  orgId: o.id,
+                                  title: jobTitle,
+                                  description: jobDesc,
+                                },
+                              },
                               {
                                 onSuccess: () => {
                                   setJobDesc("");
+                                  setJobTitle("");
                                   refresh();
                                 },
                               }
@@ -256,7 +293,7 @@ function OrganizationsPage() {
                       <div className="font-medium">Jobs</div>
                       <ul className="list-disc ml-6 mt-1">
                         {o.jobs.map((j: any) => (
-                          <li key={j.id}>{j.description}</li>
+                          <li key={j.id}>{j.title}</li>
                         ))}
                       </ul>
                     </div>

@@ -54,7 +54,8 @@ export const ModelName = {
   User: 'User',
   Organization: 'Organization',
   OrganizationUser: 'OrganizationUser',
-  Job: 'Job'
+  Job: 'Job',
+  Resume: 'Resume'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -103,12 +104,28 @@ export type OrganizationUserScalarFieldEnum = (typeof OrganizationUserScalarFiel
 
 export const JobScalarFieldEnum = {
   id: 'id',
+  title: 'title',
   description: 'description',
   organizationId: 'organizationId',
   createdAt: 'createdAt'
 } as const
 
 export type JobScalarFieldEnum = (typeof JobScalarFieldEnum)[keyof typeof JobScalarFieldEnum]
+
+
+export const ResumeScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  jobId: 'jobId',
+  organizationId: 'organizationId',
+  fileName: 'fileName',
+  path: 'path',
+  score: 'score',
+  questions: 'questions',
+  createdAt: 'createdAt'
+} as const
+
+export type ResumeScalarFieldEnum = (typeof ResumeScalarFieldEnum)[keyof typeof ResumeScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -119,10 +136,35 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: 'DbNull',
+  JsonNull: 'JsonNull'
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: 'DbNull',
+  JsonNull: 'JsonNull',
+  AnyNull: 'AnyNull'
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

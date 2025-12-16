@@ -387,7 +387,8 @@ export const ModelName = {
   User: 'User',
   Organization: 'Organization',
   OrganizationUser: 'OrganizationUser',
-  Job: 'Job'
+  Job: 'Job',
+  Resume: 'Resume'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -403,7 +404,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "organization" | "organizationUser" | "job"
+    modelProps: "user" | "organization" | "organizationUser" | "job" | "resume"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -703,6 +704,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Resume: {
+      payload: Prisma.$ResumePayload<ExtArgs>
+      fields: Prisma.ResumeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ResumeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResumePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ResumeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResumePayload>
+        }
+        findFirst: {
+          args: Prisma.ResumeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResumePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ResumeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResumePayload>
+        }
+        findMany: {
+          args: Prisma.ResumeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResumePayload>[]
+        }
+        create: {
+          args: Prisma.ResumeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResumePayload>
+        }
+        createMany: {
+          args: Prisma.ResumeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ResumeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResumePayload>[]
+        }
+        delete: {
+          args: Prisma.ResumeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResumePayload>
+        }
+        update: {
+          args: Prisma.ResumeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResumePayload>
+        }
+        deleteMany: {
+          args: Prisma.ResumeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ResumeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ResumeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResumePayload>[]
+        }
+        upsert: {
+          args: Prisma.ResumeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResumePayload>
+        }
+        aggregate: {
+          args: Prisma.ResumeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateResume>
+        }
+        groupBy: {
+          args: Prisma.ResumeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ResumeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ResumeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ResumeCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -772,12 +847,28 @@ export type OrganizationUserScalarFieldEnum = (typeof OrganizationUserScalarFiel
 
 export const JobScalarFieldEnum = {
   id: 'id',
+  title: 'title',
   description: 'description',
   organizationId: 'organizationId',
   createdAt: 'createdAt'
 } as const
 
 export type JobScalarFieldEnum = (typeof JobScalarFieldEnum)[keyof typeof JobScalarFieldEnum]
+
+
+export const ResumeScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  jobId: 'jobId',
+  organizationId: 'organizationId',
+  fileName: 'fileName',
+  path: 'path',
+  score: 'score',
+  questions: 'questions',
+  createdAt: 'createdAt'
+} as const
+
+export type ResumeScalarFieldEnum = (typeof ResumeScalarFieldEnum)[keyof typeof ResumeScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -788,12 +879,37 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -848,6 +964,34 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 /**
@@ -949,6 +1093,7 @@ export type GlobalOmitConfig = {
   organization?: Prisma.OrganizationOmit
   organizationUser?: Prisma.OrganizationUserOmit
   job?: Prisma.JobOmit
+  resume?: Prisma.ResumeOmit
 }
 
 /* Types for Logging */

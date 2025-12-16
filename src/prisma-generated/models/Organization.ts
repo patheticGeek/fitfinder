@@ -168,6 +168,7 @@ export type OrganizationWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   members?: Prisma.OrganizationUserListRelationFilter
   jobs?: Prisma.JobListRelationFilter
+  resumes?: Prisma.ResumeListRelationFilter
 }
 
 export type OrganizationOrderByWithRelationInput = {
@@ -176,6 +177,7 @@ export type OrganizationOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   members?: Prisma.OrganizationUserOrderByRelationAggregateInput
   jobs?: Prisma.JobOrderByRelationAggregateInput
+  resumes?: Prisma.ResumeOrderByRelationAggregateInput
 }
 
 export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
@@ -187,6 +189,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   members?: Prisma.OrganizationUserListRelationFilter
   jobs?: Prisma.JobListRelationFilter
+  resumes?: Prisma.ResumeListRelationFilter
 }, "id">
 
 export type OrganizationOrderByWithAggregationInput = {
@@ -213,6 +216,7 @@ export type OrganizationCreateInput = {
   createdAt?: Date | string
   members?: Prisma.OrganizationUserCreateNestedManyWithoutOrganizationInput
   jobs?: Prisma.JobCreateNestedManyWithoutOrganizationInput
+  resumes?: Prisma.ResumeCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateInput = {
@@ -221,6 +225,7 @@ export type OrganizationUncheckedCreateInput = {
   createdAt?: Date | string
   members?: Prisma.OrganizationUserUncheckedCreateNestedManyWithoutOrganizationInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutOrganizationInput
+  resumes?: Prisma.ResumeUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUpdateInput = {
@@ -229,6 +234,7 @@ export type OrganizationUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.OrganizationUserUpdateManyWithoutOrganizationNestedInput
   jobs?: Prisma.JobUpdateManyWithoutOrganizationNestedInput
+  resumes?: Prisma.ResumeUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateInput = {
@@ -237,6 +243,7 @@ export type OrganizationUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.OrganizationUserUncheckedUpdateManyWithoutOrganizationNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutOrganizationNestedInput
+  resumes?: Prisma.ResumeUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateManyInput = {
@@ -280,6 +287,11 @@ export type OrganizationScalarRelationFilter = {
   isNot?: Prisma.OrganizationWhereInput
 }
 
+export type OrganizationNullableScalarRelationFilter = {
+  is?: Prisma.OrganizationWhereInput | null
+  isNot?: Prisma.OrganizationWhereInput | null
+}
+
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
@@ -312,11 +324,28 @@ export type OrganizationUpdateOneRequiredWithoutJobsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutJobsInput, Prisma.OrganizationUpdateWithoutJobsInput>, Prisma.OrganizationUncheckedUpdateWithoutJobsInput>
 }
 
+export type OrganizationCreateNestedOneWithoutResumesInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutResumesInput, Prisma.OrganizationUncheckedCreateWithoutResumesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutResumesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneWithoutResumesNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutResumesInput, Prisma.OrganizationUncheckedCreateWithoutResumesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutResumesInput
+  upsert?: Prisma.OrganizationUpsertWithoutResumesInput
+  disconnect?: Prisma.OrganizationWhereInput | boolean
+  delete?: Prisma.OrganizationWhereInput | boolean
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutResumesInput, Prisma.OrganizationUpdateWithoutResumesInput>, Prisma.OrganizationUncheckedUpdateWithoutResumesInput>
+}
+
 export type OrganizationCreateWithoutMembersInput = {
   id?: string
   name: string
   createdAt?: Date | string
   jobs?: Prisma.JobCreateNestedManyWithoutOrganizationInput
+  resumes?: Prisma.ResumeCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutMembersInput = {
@@ -324,6 +353,7 @@ export type OrganizationUncheckedCreateWithoutMembersInput = {
   name: string
   createdAt?: Date | string
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutOrganizationInput
+  resumes?: Prisma.ResumeUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutMembersInput = {
@@ -347,6 +377,7 @@ export type OrganizationUpdateWithoutMembersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   jobs?: Prisma.JobUpdateManyWithoutOrganizationNestedInput
+  resumes?: Prisma.ResumeUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutMembersInput = {
@@ -354,6 +385,7 @@ export type OrganizationUncheckedUpdateWithoutMembersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   jobs?: Prisma.JobUncheckedUpdateManyWithoutOrganizationNestedInput
+  resumes?: Prisma.ResumeUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutJobsInput = {
@@ -361,6 +393,7 @@ export type OrganizationCreateWithoutJobsInput = {
   name: string
   createdAt?: Date | string
   members?: Prisma.OrganizationUserCreateNestedManyWithoutOrganizationInput
+  resumes?: Prisma.ResumeCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutJobsInput = {
@@ -368,6 +401,7 @@ export type OrganizationUncheckedCreateWithoutJobsInput = {
   name: string
   createdAt?: Date | string
   members?: Prisma.OrganizationUserUncheckedCreateNestedManyWithoutOrganizationInput
+  resumes?: Prisma.ResumeUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutJobsInput = {
@@ -391,6 +425,7 @@ export type OrganizationUpdateWithoutJobsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.OrganizationUserUpdateManyWithoutOrganizationNestedInput
+  resumes?: Prisma.ResumeUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutJobsInput = {
@@ -398,6 +433,55 @@ export type OrganizationUncheckedUpdateWithoutJobsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.OrganizationUserUncheckedUpdateManyWithoutOrganizationNestedInput
+  resumes?: Prisma.ResumeUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutResumesInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  members?: Prisma.OrganizationUserCreateNestedManyWithoutOrganizationInput
+  jobs?: Prisma.JobCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutResumesInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  members?: Prisma.OrganizationUserUncheckedCreateNestedManyWithoutOrganizationInput
+  jobs?: Prisma.JobUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutResumesInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutResumesInput, Prisma.OrganizationUncheckedCreateWithoutResumesInput>
+}
+
+export type OrganizationUpsertWithoutResumesInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutResumesInput, Prisma.OrganizationUncheckedUpdateWithoutResumesInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutResumesInput, Prisma.OrganizationUncheckedCreateWithoutResumesInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutResumesInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutResumesInput, Prisma.OrganizationUncheckedUpdateWithoutResumesInput>
+}
+
+export type OrganizationUpdateWithoutResumesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.OrganizationUserUpdateManyWithoutOrganizationNestedInput
+  jobs?: Prisma.JobUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutResumesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.OrganizationUserUncheckedUpdateManyWithoutOrganizationNestedInput
+  jobs?: Prisma.JobUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 
@@ -408,11 +492,13 @@ export type OrganizationUncheckedUpdateWithoutJobsInput = {
 export type OrganizationCountOutputType = {
   members: number
   jobs: number
+  resumes: number
 }
 
 export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   members?: boolean | OrganizationCountOutputTypeCountMembersArgs
   jobs?: boolean | OrganizationCountOutputTypeCountJobsArgs
+  resumes?: boolean | OrganizationCountOutputTypeCountResumesArgs
 }
 
 /**
@@ -439,6 +525,13 @@ export type OrganizationCountOutputTypeCountJobsArgs<ExtArgs extends runtime.Typ
   where?: Prisma.JobWhereInput
 }
 
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountResumesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ResumeWhereInput
+}
+
 
 export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -446,6 +539,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   createdAt?: boolean
   members?: boolean | Prisma.Organization$membersArgs<ExtArgs>
   jobs?: boolean | Prisma.Organization$jobsArgs<ExtArgs>
+  resumes?: boolean | Prisma.Organization$resumesArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["organization"]>
 
@@ -471,6 +565,7 @@ export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   members?: boolean | Prisma.Organization$membersArgs<ExtArgs>
   jobs?: boolean | Prisma.Organization$jobsArgs<ExtArgs>
+  resumes?: boolean | Prisma.Organization$resumesArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -481,6 +576,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
   objects: {
     members: Prisma.$OrganizationUserPayload<ExtArgs>[]
     jobs: Prisma.$JobPayload<ExtArgs>[]
+    resumes: Prisma.$ResumePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -882,6 +978,7 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
   readonly [Symbol.toStringTag]: "PrismaPromise"
   members<T extends Prisma.Organization$membersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$membersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrganizationUserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   jobs<T extends Prisma.Organization$jobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$jobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  resumes<T extends Prisma.Organization$resumesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$resumesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResumePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1347,6 +1444,30 @@ export type Organization$jobsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.JobScalarFieldEnum | Prisma.JobScalarFieldEnum[]
+}
+
+/**
+ * Organization.resumes
+ */
+export type Organization$resumesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Resume
+   */
+  select?: Prisma.ResumeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Resume
+   */
+  omit?: Prisma.ResumeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ResumeInclude<ExtArgs> | null
+  where?: Prisma.ResumeWhereInput
+  orderBy?: Prisma.ResumeOrderByWithRelationInput | Prisma.ResumeOrderByWithRelationInput[]
+  cursor?: Prisma.ResumeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ResumeScalarFieldEnum | Prisma.ResumeScalarFieldEnum[]
 }
 
 /**

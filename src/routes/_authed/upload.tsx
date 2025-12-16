@@ -1,8 +1,8 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import React, { useState } from "react";
-import { uploadResumeFn } from "./upload.fn";
+import { listJobsFn, uploadResumeFn } from "./upload.fn";
 
 export const Route = createFileRoute("/_authed/upload")({
   component: UploadPage,
@@ -11,9 +11,19 @@ export const Route = createFileRoute("/_authed/upload")({
 function UploadPage() {
   const [jobDescription, setJobDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
 
   const mutation = useMutation({
     mutationFn: useServerFn(uploadResumeFn),
+  });
+  const listJobsServer = useServerFn(listJobsFn);
+  const jobsQuery = useQuery({
+    queryKey: ["jobs"],
+    queryFn: async () => {
+      const res = await listJobsServer();
+      return res;
+    },
   });
 
   const submit = async (e: React.FormEvent) => {
@@ -30,15 +40,17 @@ function UploadPage() {
             mimeType: file.type,
             contentBase64,
             jobDescription,
+            jobId: selectedJobId ?? undefined,
+            orgId: selectedOrgId ?? undefined,
           },
         },
         {
-          onError(err: any) {
+          onError(err) {
             console.log(err);
           },
         }
       );
-    } catch (err: any) {
+    } catch (err) {
       alert("Failed to read file: " + err.message);
     }
   };
@@ -47,6 +59,34 @@ function UploadPage() {
     <div className="p-4 max-w-2xl">
       <h2 className="text-xl font-bold mb-2">Upload Resume</h2>
       <form onSubmit={submit} className="space-y-3">
+        <div>
+          <label className="block font-medium">Select Job (optional)</label>
+          <select
+            value={selectedJobId ?? ""}
+            onChange={(e) => {
+              const id = e.target.value || null;
+              setSelectedJobId(id);
+              if (!id) {
+                setSelectedOrgId(null);
+                setJobDescription("");
+                return;
+              }
+              const job = jobsQuery.data?.jobs?.find((j) => j.id === id);
+              if (job) {
+                setSelectedOrgId(job.organization?.id ?? null);
+                setJobDescription(job.description ?? "");
+              }
+            }}
+            className="border p-2 w-full"
+          >
+            <option value="">-- None / Custom Job Description --</option>
+            {jobsQuery.data?.jobs?.map((j) => (
+              <option key={j.id} value={j.id}>
+                {j.organization.name + " - " + (j.title ?? "Untitled")}
+              </option>
+            ))}
+          </select>
+        </div>
         <div>
           <label className="block font-medium">Resume (PDF)</label>
           <input

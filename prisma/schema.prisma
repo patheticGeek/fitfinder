@@ -15,6 +15,7 @@ model User {
   email         String             @unique
   password      String
   organizations OrganizationUser[]
+  resumes       Resume[]
 }
 
 model Organization {
@@ -22,6 +23,7 @@ model Organization {
   name      String
   members   OrganizationUser[]
   jobs      Job[]
+  resumes   Resume[]
   createdAt DateTime           @default(now())
 }
 
@@ -38,8 +40,25 @@ model OrganizationUser {
 
 model Job {
   id             String       @id @default(uuid())
+  title          String?
   description    String
   organization   Organization @relation(fields: [organizationId], references: [id])
   organizationId String
+  resumes        Resume[]
   createdAt      DateTime     @default(now())
+}
+
+model Resume {
+  id             String        @id @default(uuid())
+  user           User?         @relation(fields: [userId], references: [id])
+  userId         String?
+  job            Job?          @relation(fields: [jobId], references: [id])
+  jobId          String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationId String?
+  fileName       String
+  path           String
+  score          Int?
+  questions      Json?
+  createdAt      DateTime      @default(now())
 }

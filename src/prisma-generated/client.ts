@@ -59,3 +59,8 @@ export type OrganizationUser = Prisma.OrganizationUserModel
  * 
  */
 export type Job = Prisma.JobModel
+/**
+ * Model Resume
+ * 
+ */
+export type Resume = Prisma.ResumeModel

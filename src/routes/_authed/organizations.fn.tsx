@@ -6,7 +6,7 @@ export const createOrganizationFn = createServerFn({ method: "POST" })
   .inputValidator((d: { name: string }) => d)
   .handler(async ({ data }) => {
     const session = await useAppSession();
-    const userEmail = (session as any).data?.userEmail;
+    const userEmail = session?.data?.userEmail;
     if (!userEmail) return { error: true, message: "Not authenticated" };
 
     const user = await prismaClient.user.findUnique({
@@ -32,7 +32,7 @@ export const createOrganizationFn = createServerFn({ method: "POST" })
 export const listOrganizationsFn = createServerFn({ method: "GET" }).handler(
   async () => {
     const session = await useAppSession();
-    const userEmail = (session as any).data?.userEmail;
+    const userEmail = session?.data?.userEmail;
     if (!userEmail) return { error: true, message: "Not authenticated" };
 
     const user = await prismaClient.user.findUnique({
@@ -58,7 +58,7 @@ export const addAdminFn = createServerFn({ method: "POST" })
   .inputValidator((d: { orgId: string; userEmail: string }) => d)
   .handler(async ({ data }) => {
     const session = await useAppSession();
-    const userEmail = (session as any).data?.userEmail;
+    const userEmail = session?.data?.userEmail;
     if (!userEmail) return { error: true, message: "Not authenticated" };
 
     const user = await prismaClient.user.findUnique({
@@ -96,10 +96,12 @@ export const addAdminFn = createServerFn({ method: "POST" })
   });
 
 export const createJobFn = createServerFn({ method: "POST" })
-  .inputValidator((d: { orgId: string; description: string }) => d)
+  .inputValidator(
+    (d: { orgId: string; title: string; description: string }) => d
+  )
   .handler(async ({ data }) => {
     const session = await useAppSession();
-    const userEmail = (session as any).data?.userEmail;
+    const userEmail = session?.data?.userEmail;
     if (!userEmail) return { error: true, message: "Not authenticated" };
 
     const user = await prismaClient.user.findUnique({
@@ -116,7 +118,11 @@ export const createJobFn = createServerFn({ method: "POST" })
       return { error: true, message: "Not authorized" };
 
     const job = await prismaClient.job.create({
-      data: { description: data.description, organizationId: data.orgId },
+      data: {
+        title: data.title,
+        description: data.description,
+        organizationId: data.orgId,
+      },
     });
 
     return { job };
