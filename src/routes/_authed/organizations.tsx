@@ -132,15 +132,70 @@ export const createJobFn = createServerFn({ method: "POST" })
     return { job };
   });
 
+export const deleteJobFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { jobId: string }) => d)
+  .handler(async ({ data }) => {
+    const session = await useAppSession();
+    const userEmail = session?.data?.userEmail;
+    if (!userEmail) return { error: true, message: "Not authenticated" };
+
+    const user = await prismaClient.user.findUnique({
+      where: { email: userEmail },
+    });
+    if (!user) return { error: true, message: "User not found" };
+
+    const job = await prismaClient.job.findUnique({
+      where: { id: data.jobId },
+    });
+    if (!job) return { error: true, message: "Job not found" };
+
+    const membership = await prismaClient.organizationUser.findUnique({
+      where: {
+        userId_organizationId: {
+          userId: user.id,
+          organizationId: job.organizationId,
+        },
+      },
+    });
+    if (!membership || !membership.isAdmin)
+      return { error: true, message: "Not authorized" };
+
+    await prismaClient.job.delete({ where: { id: data.jobId } });
+
+    return { ok: true };
+  });
+
+export const deleteOrgFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { orgId: string }) => d)
+  .handler(async ({ data }) => {
+    const session = await useAppSession();
+    const userEmail = session?.data?.userEmail;
+    if (!userEmail) return { error: true, message: "Not authenticated" };
+
+    const user = await prismaClient.user.findUnique({
+      where: { email: userEmail },
+    });
+    if (!user) return { error: true, message: "User not found" };
+
+    const membership = await prismaClient.organizationUser.findUnique({
+      where: {
+        userId_organizationId: { userId: user.id, organizationId: data.orgId },
+      },
+    });
+    if (!membership || !membership.isAdmin)
+      return { error: true, message: "Not authorized" };
+
+    await prismaClient.organization.delete({ where: { id: data.orgId } });
+
+    return { ok: true };
+  });
+
 export const Route = createFileRoute("/_authed/organizations")({
   component: OrganizationsPage,
 });
 
 function OrganizationsPage() {
   const [name, setName] = useState("");
-  const [jobTitle, setJobTitle] = useState("");
-  const [jobDesc, setJobDesc] = useState("");
-  const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
 
   const listServerFn = useServerFn(listOrganizationsFn);
   const listQuery = useQuery({
@@ -153,10 +208,6 @@ function OrganizationsPage() {
   const createMutation = useMutation({
     mutationFn: useServerFn(createOrganizationFn),
   });
-  const createJobMutation = useMutation({
-    mutationFn: useServerFn(createJobFn),
-  });
-  const addAdminMutation = useMutation({ mutationFn: useServerFn(addAdminFn) });
 
   function refresh() {
     listQuery.refetch();
@@ -232,73 +283,6 @@ function OrganizationsPage() {
                     </Link>
                   </div>
                 </div>
-
-                {selectedOrg === o.id && (
-                  <div className="mt-3">
-                    <div className="mb-2">
-                      <label className="block font-medium">Add Job</label>
-                      <input
-                        value={jobTitle}
-                        onChange={(e) => setJobTitle(e.target.value)}
-                        placeholder="Job title"
-                        className="w-full border p-2 mb-2"
-                      />
-                      <textarea
-                        value={jobDesc}
-                        onChange={(e) => setJobDesc(e.target.value)}
-                        className="w-full border p-2"
-                      />
-                      <div className="mt-2">
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            if (!jobTitle) return alert("Enter job title");
-                            if (!jobDesc) return alert("Enter job description");
-                            createJobMutation.mutate(
-                              {
-                                data: {
-                                  orgId: o.id,
-                                  title: jobTitle,
-                                  description: jobDesc,
-                                },
-                              },
-                              {
-                                onSuccess: () => {
-                                  setJobDesc("");
-                                  setJobTitle("");
-                                  refresh();
-                                },
-                              }
-                            );
-                          }}
-                          className="px-2 py-1 bg-indigo-600 text-white rounded mr-2"
-                        >
-                          Create Job
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="mb-2">
-                      <label className="block font-medium">
-                        Add Admin by Email
-                      </label>
-                      <AdminForm
-                        orgId={o.id}
-                        onAdded={refresh}
-                        addAdminMutation={addAdminMutation}
-                      />
-                    </div>
-
-                    <div>
-                      <div className="font-medium">Jobs</div>
-                      <ul className="list-disc ml-6 mt-1">
-                        {o.jobs.map((j: any) => (
-                          <li key={j.id}>{j.title}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
               </li>
             ))}
           </ul>
@@ -307,37 +291,5 @@ function OrganizationsPage() {
         )}
       </div>
     </div>
-  );
-}
-
-function AdminForm({ orgId, onAdded, addAdminMutation }: any) {
-  const [email, setEmail] = useState("");
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        addAdminMutation.mutate(
-          { data: { orgId, userEmail: email } },
-          {
-            onSuccess: () => {
-              setEmail("");
-              onAdded();
-            },
-          }
-        );
-      }}
-    >
-      <div className="flex gap-2">
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="border p-2 flex-1"
-          placeholder="user@example.com"
-        />
-        <button className="px-2 py-1 bg-yellow-600 text-white rounded">
-          Add Admin
-        </button>
-      </div>
-    </form>
   );
 }

@@ -1,9 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { prismaClient } from "~/utils/prisma";
 import { useAppSession } from "~/utils/session";
+import {
+  addAdminFn,
+  createJobFn,
+  deleteJobFn,
+  deleteOrgFn,
+} from "./organizations";
 
 export const getOrganizationFn = createServerFn({ method: "GET" })
   .inputValidator((d: { orgId: string }) => d)
@@ -46,6 +52,25 @@ function OrgPage() {
 
   const org = q.data?.org;
   const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
+  const [jobTitle, setJobTitle] = useState("");
+  const [jobDesc, setJobDesc] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const createJobMutation = useMutation({
+    mutationFn: useServerFn(createJobFn),
+  });
+  const addAdminMutation = useMutation({ mutationFn: useServerFn(addAdminFn) });
+  const deleteJobMutation = useMutation({
+    mutationFn: useServerFn(deleteJobFn),
+  });
+  const deleteOrgMutation = useMutation({
+    mutationFn: useServerFn(deleteOrgFn),
+  });
+
+  function refresh() {
+    q.refetch();
+  }
 
   return (
     <div className="p-4 max-w-4xl">
@@ -74,6 +99,29 @@ function OrgPage() {
             Members: {org!.members.length}
           </div>
 
+          <div className="mt-3 flex gap-3">
+            <button
+              className="px-2 py-1 bg-red-600 text-white rounded"
+              onClick={() => {
+                if (!confirmDelete) {
+                  setConfirmDelete(true);
+                  setTimeout(() => setConfirmDelete(false), 5000);
+                  return;
+                }
+
+                deleteOrgMutation.mutate(
+                  { data: { orgId } },
+                  {
+                    onSuccess: () =>
+                      (window.location.href = "/_authed/organizations"),
+                  }
+                );
+              }}
+            >
+              {confirmDelete ? "Confirm Delete Org" : "Delete Org"}
+            </button>
+          </div>
+
           <div className="mt-4">
             <div className="font-semibold">Jobs</div>
             {org!.jobs.length ? (
@@ -86,14 +134,31 @@ function OrgPage() {
                         <div className="font-medium">
                           {j.title ?? "Untitled"}
                         </div>
-                        <button
-                          className="px-2 py-1 bg-gray-700 text-white rounded text-sm"
-                          onClick={() =>
-                            setExpandedJobId(expanded ? null : j.id)
-                          }
-                        >
-                          {expanded ? "Collapse" : "Details"}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            className="px-2 py-1 bg-gray-700 text-white rounded text-sm"
+                            onClick={() =>
+                              setExpandedJobId(expanded ? null : j.id)
+                            }
+                          >
+                            {expanded ? "Collapse" : "Details"}
+                          </button>
+                          <button
+                            className="px-2 py-1 bg-red-600 text-white rounded text-sm"
+                            onClick={async () => {
+                              if (
+                                !confirm("Delete job? This cannot be undone.")
+                              )
+                                return;
+                              deleteJobMutation.mutate(
+                                { data: { jobId: j.id } },
+                                { onSuccess: () => refresh() }
+                              );
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
 
                       {expanded && (
@@ -138,6 +203,79 @@ function OrgPage() {
             ) : (
               <div className="text-gray-500 mt-2">No jobs yet</div>
             )}
+          </div>
+
+          <div className="mt-6">
+            <div className="font-semibold">Create Job</div>
+            <div className="mt-2">
+              <input
+                className="w-full border p-2 mb-2"
+                placeholder="Job title"
+                value={jobTitle}
+                onChange={(e) => setJobTitle(e.target.value)}
+              />
+              <textarea
+                className="w-full border p-2 mb-2"
+                placeholder="Job description"
+                value={jobDesc}
+                onChange={(e) => setJobDesc(e.target.value)}
+              />
+              <div>
+                <button
+                  className="px-3 py-1 bg-indigo-600 text-white rounded"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (!jobTitle) return alert("Enter job title");
+                    if (!jobDesc) return alert("Enter job description");
+                    createJobMutation.mutate(
+                      {
+                        data: { orgId, title: jobTitle, description: jobDesc },
+                      },
+                      {
+                        onSuccess: () => {
+                          setJobTitle("");
+                          setJobDesc("");
+                          refresh();
+                        },
+                      }
+                    );
+                  }}
+                >
+                  Create Job
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <div className="font-semibold">Add Admin</div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!adminEmail) return alert("Enter an email");
+                addAdminMutation.mutate(
+                  { data: { orgId, userEmail: adminEmail } },
+                  {
+                    onSuccess: () => {
+                      setAdminEmail("");
+                      refresh();
+                    },
+                  }
+                );
+              }}
+            >
+              <div className="flex gap-2 mt-2">
+                <input
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
+                  className="border p-2 flex-1"
+                  placeholder="user@example.com"
+                />
+                <button className="px-2 py-1 bg-yellow-600 text-white rounded">
+                  Add Admin
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

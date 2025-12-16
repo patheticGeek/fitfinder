@@ -30,6 +30,8 @@ function UploadPage() {
     e.preventDefault();
     if (!file) return alert("Please select a PDF resume");
 
+    if (!selectedJobId) return alert("Please select a job before uploading");
+
     try {
       const base64 = (await readFileAsBase64(file)) as string;
       const contentBase64 = base64.replace(/^data:.*;base64,/, "");
@@ -40,7 +42,7 @@ function UploadPage() {
             mimeType: file.type,
             contentBase64,
             jobDescription,
-            jobId: selectedJobId ?? undefined,
+            jobId: selectedJobId,
             orgId: selectedOrgId ?? undefined,
           },
         },
@@ -51,7 +53,8 @@ function UploadPage() {
         }
       );
     } catch (err) {
-      alert("Failed to read file: " + err.message);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert("Failed to read file: " + msg);
     }
   };
 
@@ -60,7 +63,7 @@ function UploadPage() {
       <h2 className="text-xl font-bold mb-2">Upload Resume</h2>
       <form onSubmit={submit} className="space-y-3">
         <div>
-          <label className="block font-medium">Select Job (optional)</label>
+          <label className="block font-medium">Select Job (required)</label>
           <select
             value={selectedJobId ?? ""}
             onChange={(e) => {
