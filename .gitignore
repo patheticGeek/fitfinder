@@ -19,5 +19,5 @@ dev.db
 /blob-report/
 /playwright/.cache/
 
-# Uploaded resumes (saved locally)
-/uploaded
+src/prisma-generated
+src/routeTree.gen.ts
