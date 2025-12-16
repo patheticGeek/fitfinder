@@ -10,7 +10,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import { prismaClient } from "~/utils/prisma";
 import { useAppSession } from "~/utils/session";
 
-type UploadInput = {
+type ApplyInput = {
   fileName: string;
   mimeType: string;
   contentBase64: string;
@@ -19,7 +19,7 @@ type UploadInput = {
   orgId?: string;
 };
 
-const UploadSchema = z.object({
+const ApplySchema = z.object({
   fileName: z.string().min(1),
   mimeType: z.string().regex(/^application\/pdf$/i),
   contentBase64: z.string().min(20),
@@ -28,12 +28,10 @@ const UploadSchema = z.object({
   orgId: z.string().optional(),
 });
 
-export const uploadResumeFn = createServerFn({ method: "POST" })
-  .inputValidator((d: UploadInput) => d)
+export const applyResumeFn = createServerFn({ method: "POST" })
+  .inputValidator((d: ApplyInput) => d)
   .handler(async ({ data }) => {
     try {
-      // Early check: if no data was sent, return a clear error instead of
-      // letting Zod produce an 'expected object received undefined' message.
       if (data == null) {
         return {
           error: true,
@@ -41,10 +39,7 @@ export const uploadResumeFn = createServerFn({ method: "POST" })
         };
       }
 
-      // Validate inside handler to avoid throwing a ZodError that the
-      // dev-server runtime may attempt to inspect (which can cause the
-      // observed TypeError). Use safeParse and return a simple error shape.
-      const parsed = UploadSchema.safeParse(data);
+      const parsed = ApplySchema.safeParse(data);
       if (!parsed.success) {
         return { error: true, message: parsed.error.message };
       }
@@ -57,7 +52,6 @@ export const uploadResumeFn = createServerFn({ method: "POST" })
         orgId,
       } = parsed.data;
 
-      // Attach authenticated user when possible
       const session = await useAppSession();
       const userEmail = session?.data?.userEmail;
       const user = userEmail
@@ -92,7 +86,6 @@ export const uploadResumeFn = createServerFn({ method: "POST" })
         jobDescription || ""
       );
 
-      // Persist resume record in DB (non-fatal)
       let resumeRecord: any = null;
       try {
         resumeRecord = await prismaClient.resume.create({
@@ -110,7 +103,6 @@ export const uploadResumeFn = createServerFn({ method: "POST" })
         console.warn("Failed to persist resume record:", e?.message || e);
       }
 
-      // Return the job/org ids back so the client can associate the upload
       return {
         id,
         path: `/uploaded/${id}/resume.pdf`,
@@ -121,8 +113,6 @@ export const uploadResumeFn = createServerFn({ method: "POST" })
         resumeId: resumeRecord?.id ?? null,
       };
     } catch (err: any) {
-      // Return a simple error object to avoid the server runtime attempting
-      // to inspect complex error shapes which can cause util.inspect failures.
       const message = err?.message || String(err) || "Unknown error";
       return { error: true, message };
     }
@@ -142,7 +132,6 @@ function computeMatchScore(resumeText: string, jobDescription: string) {
   return Math.round((matches / jdTokens.length) * 100);
 }
 
-// List jobs so the client can show selectable jobs across organizations
 export const listJobsFn = createServerFn({ method: "GET" }).handler(
   async () => {
     const session = await useAppSession();
@@ -202,7 +191,6 @@ async function generateMatchAndQuestionsWithGemini(
 
     const validated = GeminiStructuredSchema.parse(JSON.parse(out));
 
-    // Normalize questions to expected shape (strings -> objects)
     const questions = validated.questions.map((q: any) => ({
       text: String(q.text),
       topic: q.topic ? String(q.topic) : undefined,
@@ -217,13 +205,10 @@ async function generateMatchAndQuestionsWithGemini(
   }
 }
 
-export const Route = createFileRoute("/_authed/upload/fn")({
+export const Route = createFileRoute("/_authed/apply/fn")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  if (typeof window !== "undefined") {
-    window.location.pathname = "/_authed/apply/fn";
-  }
-  return <div>Redirecting to /_authed/apply/fn…</div>;
+  return <div>Hello "/apply/fn"!</div>;
 }

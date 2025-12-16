@@ -17,13 +17,13 @@ export default function Header({ email }: { email?: string }) {
           Home
         </Link>
         <Link
-          to="/upload"
+          to="/apply"
           activeProps={{
             className: "font-bold",
           }}
           activeOptions={{ exact: true }}
         >
-          Upload
+          Apply
         </Link>
         {email && (
           <Link
