@@ -14,10 +14,8 @@ import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthedUploadRouteImport } from './routes/_authed/upload'
 import { Route as AuthedOrganizationsRouteImport } from './routes/_authed/organizations'
 import { Route as AuthedApplyRouteImport } from './routes/_authed/apply'
-import { Route as AuthedUploadFnRouteImport } from './routes/_authed/upload.fn'
 import { Route as AuthedOrganizationOrgIdRouteImport } from './routes/_authed/organization.$orgId'
 import { Route as AuthedApplyFnRouteImport } from './routes/_authed/apply.fn'
 
@@ -45,11 +43,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedUploadRoute = AuthedUploadRouteImport.update({
-  id: '/upload',
-  path: '/upload',
-  getParentRoute: () => AuthedRoute,
-} as any)
 const AuthedOrganizationsRoute = AuthedOrganizationsRouteImport.update({
   id: '/organizations',
   path: '/organizations',
@@ -59,11 +52,6 @@ const AuthedApplyRoute = AuthedApplyRouteImport.update({
   id: '/apply',
   path: '/apply',
   getParentRoute: () => AuthedRoute,
-} as any)
-const AuthedUploadFnRoute = AuthedUploadFnRouteImport.update({
-  id: '/fn',
-  path: '/fn',
-  getParentRoute: () => AuthedUploadRoute,
 } as any)
 const AuthedOrganizationOrgIdRoute = AuthedOrganizationOrgIdRouteImport.update({
   id: '/organization/$orgId',
@@ -83,10 +71,8 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/apply': typeof AuthedApplyRouteWithChildren
   '/organizations': typeof AuthedOrganizationsRoute
-  '/upload': typeof AuthedUploadRouteWithChildren
   '/apply/fn': typeof AuthedApplyFnRoute
   '/organization/$orgId': typeof AuthedOrganizationOrgIdRoute
-  '/upload/fn': typeof AuthedUploadFnRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -95,10 +81,8 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/apply': typeof AuthedApplyRouteWithChildren
   '/organizations': typeof AuthedOrganizationsRoute
-  '/upload': typeof AuthedUploadRouteWithChildren
   '/apply/fn': typeof AuthedApplyFnRoute
   '/organization/$orgId': typeof AuthedOrganizationOrgIdRoute
-  '/upload/fn': typeof AuthedUploadFnRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -109,10 +93,8 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_authed/apply': typeof AuthedApplyRouteWithChildren
   '/_authed/organizations': typeof AuthedOrganizationsRoute
-  '/_authed/upload': typeof AuthedUploadRouteWithChildren
   '/_authed/apply/fn': typeof AuthedApplyFnRoute
   '/_authed/organization/$orgId': typeof AuthedOrganizationOrgIdRoute
-  '/_authed/upload/fn': typeof AuthedUploadFnRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -123,10 +105,8 @@ export interface FileRouteTypes {
     | '/signup'
     | '/apply'
     | '/organizations'
-    | '/upload'
     | '/apply/fn'
     | '/organization/$orgId'
-    | '/upload/fn'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -135,10 +115,8 @@ export interface FileRouteTypes {
     | '/signup'
     | '/apply'
     | '/organizations'
-    | '/upload'
     | '/apply/fn'
     | '/organization/$orgId'
-    | '/upload/fn'
   id:
     | '__root__'
     | '/'
@@ -148,10 +126,8 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_authed/apply'
     | '/_authed/organizations'
-    | '/_authed/upload'
     | '/_authed/apply/fn'
     | '/_authed/organization/$orgId'
-    | '/_authed/upload/fn'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -199,13 +175,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed/upload': {
-      id: '/_authed/upload'
-      path: '/upload'
-      fullPath: '/upload'
-      preLoaderRoute: typeof AuthedUploadRouteImport
-      parentRoute: typeof AuthedRoute
-    }
     '/_authed/organizations': {
       id: '/_authed/organizations'
       path: '/organizations'
@@ -219,13 +188,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/apply'
       preLoaderRoute: typeof AuthedApplyRouteImport
       parentRoute: typeof AuthedRoute
-    }
-    '/_authed/upload/fn': {
-      id: '/_authed/upload/fn'
-      path: '/fn'
-      fullPath: '/upload/fn'
-      preLoaderRoute: typeof AuthedUploadFnRouteImport
-      parentRoute: typeof AuthedUploadRoute
     }
     '/_authed/organization/$orgId': {
       id: '/_authed/organization/$orgId'
@@ -256,29 +218,15 @@ const AuthedApplyRouteWithChildren = AuthedApplyRoute._addFileChildren(
   AuthedApplyRouteChildren,
 )
 
-interface AuthedUploadRouteChildren {
-  AuthedUploadFnRoute: typeof AuthedUploadFnRoute
-}
-
-const AuthedUploadRouteChildren: AuthedUploadRouteChildren = {
-  AuthedUploadFnRoute: AuthedUploadFnRoute,
-}
-
-const AuthedUploadRouteWithChildren = AuthedUploadRoute._addFileChildren(
-  AuthedUploadRouteChildren,
-)
-
 interface AuthedRouteChildren {
   AuthedApplyRoute: typeof AuthedApplyRouteWithChildren
   AuthedOrganizationsRoute: typeof AuthedOrganizationsRoute
-  AuthedUploadRoute: typeof AuthedUploadRouteWithChildren
   AuthedOrganizationOrgIdRoute: typeof AuthedOrganizationOrgIdRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedApplyRoute: AuthedApplyRouteWithChildren,
   AuthedOrganizationsRoute: AuthedOrganizationsRoute,
-  AuthedUploadRoute: AuthedUploadRouteWithChildren,
   AuthedOrganizationOrgIdRoute: AuthedOrganizationOrgIdRoute,
 }
 
