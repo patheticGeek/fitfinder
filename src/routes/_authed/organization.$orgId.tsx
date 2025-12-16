@@ -112,8 +112,7 @@ function OrgPage() {
                 deleteOrgMutation.mutate(
                   { data: { orgId } },
                   {
-                    onSuccess: () =>
-                      (window.location.href = "/_authed/organizations"),
+                    onSuccess: () => (window.location.href = "/organizations"),
                   }
                 );
               }}

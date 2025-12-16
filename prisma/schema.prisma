@@ -29,9 +29,9 @@ model Organization {
 
 model OrganizationUser {
   id             String       @id @default(uuid())
-  user           User         @relation(fields: [userId], references: [id])
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
-  organization   Organization @relation(fields: [organizationId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId String
   isAdmin        Boolean      @default(false)
 
@@ -42,7 +42,7 @@ model Job {
   id             String       @id @default(uuid())
   title          String?
   description    String
-  organization   Organization @relation(fields: [organizationId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId String
   resumes        Resume[]
   createdAt      DateTime     @default(now())
@@ -50,11 +50,11 @@ model Job {
 
 model Resume {
   id             String        @id @default(uuid())
-  user           User?         @relation(fields: [userId], references: [id])
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String?
-  job            Job?          @relation(fields: [jobId], references: [id])
+  job            Job?          @relation(fields: [jobId], references: [id], onDelete: Cascade)
   jobId          String?
-  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId String?
   fileName       String
   path           String
