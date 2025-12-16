@@ -7,7 +7,10 @@ type SessionUser = {
 };
 
 export function useAppSession() {
+  if (!process.env.SESSION_PASSWORD) {
+    throw new Error("SESSION_PASSWORD is not set in environment variables");
+  }
   return useSession<SessionUser>({
-    password: "ChangeThisBeforeShippingToProdOrYouWillBeFired",
+    password: process.env.SESSION_PASSWORD,
   });
 }
