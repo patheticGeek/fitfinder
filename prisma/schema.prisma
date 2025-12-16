@@ -49,16 +49,17 @@ model Job {
 }
 
 model Resume {
-  id             String        @id @default(uuid())
-  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         String?
-  job            Job?          @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  jobId          String?
-  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  organizationId String?
-  fileName       String
-  path           String
-  score          Int?
-  questions      Json?
-  createdAt      DateTime      @default(now())
+  id                  String        @id @default(uuid())
+  user                User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId              String?
+  job                 Job?          @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId               String?
+  organization        Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId      String?
+  fileName            String
+  path                String
+  score               Int?
+  scoreJustification  String?
+  questions           Json?
+  createdAt           DateTime      @default(now())
 }

@@ -42,6 +42,7 @@ export type ResumeMinAggregateOutputType = {
   fileName: string | null
   path: string | null
   score: number | null
+  scoreJustification: string | null
   createdAt: Date | null
 }
 
@@ -53,6 +54,7 @@ export type ResumeMaxAggregateOutputType = {
   fileName: string | null
   path: string | null
   score: number | null
+  scoreJustification: string | null
   createdAt: Date | null
 }
 
@@ -64,6 +66,7 @@ export type ResumeCountAggregateOutputType = {
   fileName: number
   path: number
   score: number
+  scoreJustification: number
   questions: number
   createdAt: number
   _all: number
@@ -86,6 +89,7 @@ export type ResumeMinAggregateInputType = {
   fileName?: true
   path?: true
   score?: true
+  scoreJustification?: true
   createdAt?: true
 }
 
@@ -97,6 +101,7 @@ export type ResumeMaxAggregateInputType = {
   fileName?: true
   path?: true
   score?: true
+  scoreJustification?: true
   createdAt?: true
 }
 
@@ -108,6 +113,7 @@ export type ResumeCountAggregateInputType = {
   fileName?: true
   path?: true
   score?: true
+  scoreJustification?: true
   questions?: true
   createdAt?: true
   _all?: true
@@ -207,6 +213,7 @@ export type ResumeGroupByOutputType = {
   fileName: string
   path: string
   score: number | null
+  scoreJustification: string | null
   questions: runtime.JsonValue | null
   createdAt: Date
   _count: ResumeCountAggregateOutputType | null
@@ -242,6 +249,7 @@ export type ResumeWhereInput = {
   fileName?: Prisma.StringFilter<"Resume"> | string
   path?: Prisma.StringFilter<"Resume"> | string
   score?: Prisma.IntNullableFilter<"Resume"> | number | null
+  scoreJustification?: Prisma.StringNullableFilter<"Resume"> | string | null
   questions?: Prisma.JsonNullableFilter<"Resume">
   createdAt?: Prisma.DateTimeFilter<"Resume"> | Date | string
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
@@ -257,6 +265,7 @@ export type ResumeOrderByWithRelationInput = {
   fileName?: Prisma.SortOrder
   path?: Prisma.SortOrder
   score?: Prisma.SortOrderInput | Prisma.SortOrder
+  scoreJustification?: Prisma.SortOrderInput | Prisma.SortOrder
   questions?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -275,6 +284,7 @@ export type ResumeWhereUniqueInput = Prisma.AtLeast<{
   fileName?: Prisma.StringFilter<"Resume"> | string
   path?: Prisma.StringFilter<"Resume"> | string
   score?: Prisma.IntNullableFilter<"Resume"> | number | null
+  scoreJustification?: Prisma.StringNullableFilter<"Resume"> | string | null
   questions?: Prisma.JsonNullableFilter<"Resume">
   createdAt?: Prisma.DateTimeFilter<"Resume"> | Date | string
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
@@ -290,6 +300,7 @@ export type ResumeOrderByWithAggregationInput = {
   fileName?: Prisma.SortOrder
   path?: Prisma.SortOrder
   score?: Prisma.SortOrderInput | Prisma.SortOrder
+  scoreJustification?: Prisma.SortOrderInput | Prisma.SortOrder
   questions?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ResumeCountOrderByAggregateInput
@@ -310,6 +321,7 @@ export type ResumeScalarWhereWithAggregatesInput = {
   fileName?: Prisma.StringWithAggregatesFilter<"Resume"> | string
   path?: Prisma.StringWithAggregatesFilter<"Resume"> | string
   score?: Prisma.IntNullableWithAggregatesFilter<"Resume"> | number | null
+  scoreJustification?: Prisma.StringNullableWithAggregatesFilter<"Resume"> | string | null
   questions?: Prisma.JsonNullableWithAggregatesFilter<"Resume">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Resume"> | Date | string
 }
@@ -319,6 +331,7 @@ export type ResumeCreateInput = {
   fileName: string
   path: string
   score?: number | null
+  scoreJustification?: string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutResumesInput
@@ -334,6 +347,7 @@ export type ResumeUncheckedCreateInput = {
   fileName: string
   path: string
   score?: number | null
+  scoreJustification?: string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
@@ -343,6 +357,7 @@ export type ResumeUpdateInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scoreJustification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutResumesNestedInput
@@ -358,6 +373,7 @@ export type ResumeUncheckedUpdateInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scoreJustification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -370,6 +386,7 @@ export type ResumeCreateManyInput = {
   fileName: string
   path: string
   score?: number | null
+  scoreJustification?: string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
@@ -379,6 +396,7 @@ export type ResumeUpdateManyMutationInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scoreJustification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -391,6 +409,7 @@ export type ResumeUncheckedUpdateManyInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scoreJustification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -413,6 +432,7 @@ export type ResumeCountOrderByAggregateInput = {
   fileName?: Prisma.SortOrder
   path?: Prisma.SortOrder
   score?: Prisma.SortOrder
+  scoreJustification?: Prisma.SortOrder
   questions?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -429,6 +449,7 @@ export type ResumeMaxOrderByAggregateInput = {
   fileName?: Prisma.SortOrder
   path?: Prisma.SortOrder
   score?: Prisma.SortOrder
+  scoreJustification?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -440,6 +461,7 @@ export type ResumeMinOrderByAggregateInput = {
   fileName?: Prisma.SortOrder
   path?: Prisma.SortOrder
   score?: Prisma.SortOrder
+  scoreJustification?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -586,6 +608,7 @@ export type ResumeCreateWithoutUserInput = {
   fileName: string
   path: string
   score?: number | null
+  scoreJustification?: string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   job?: Prisma.JobCreateNestedOneWithoutResumesInput
@@ -599,6 +622,7 @@ export type ResumeUncheckedCreateWithoutUserInput = {
   fileName: string
   path: string
   score?: number | null
+  scoreJustification?: string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
@@ -640,6 +664,7 @@ export type ResumeScalarWhereInput = {
   fileName?: Prisma.StringFilter<"Resume"> | string
   path?: Prisma.StringFilter<"Resume"> | string
   score?: Prisma.IntNullableFilter<"Resume"> | number | null
+  scoreJustification?: Prisma.StringNullableFilter<"Resume"> | string | null
   questions?: Prisma.JsonNullableFilter<"Resume">
   createdAt?: Prisma.DateTimeFilter<"Resume"> | Date | string
 }
@@ -649,6 +674,7 @@ export type ResumeCreateWithoutOrganizationInput = {
   fileName: string
   path: string
   score?: number | null
+  scoreJustification?: string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutResumesInput
@@ -662,6 +688,7 @@ export type ResumeUncheckedCreateWithoutOrganizationInput = {
   fileName: string
   path: string
   score?: number | null
+  scoreJustification?: string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
@@ -697,6 +724,7 @@ export type ResumeCreateWithoutJobInput = {
   fileName: string
   path: string
   score?: number | null
+  scoreJustification?: string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutResumesInput
@@ -710,6 +738,7 @@ export type ResumeUncheckedCreateWithoutJobInput = {
   fileName: string
   path: string
   score?: number | null
+  scoreJustification?: string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
@@ -747,6 +776,7 @@ export type ResumeCreateManyUserInput = {
   fileName: string
   path: string
   score?: number | null
+  scoreJustification?: string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
@@ -756,6 +786,7 @@ export type ResumeUpdateWithoutUserInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scoreJustification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   job?: Prisma.JobUpdateOneWithoutResumesNestedInput
@@ -769,6 +800,7 @@ export type ResumeUncheckedUpdateWithoutUserInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scoreJustification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -780,6 +812,7 @@ export type ResumeUncheckedUpdateManyWithoutUserInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scoreJustification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -791,6 +824,7 @@ export type ResumeCreateManyOrganizationInput = {
   fileName: string
   path: string
   score?: number | null
+  scoreJustification?: string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
@@ -800,6 +834,7 @@ export type ResumeUpdateWithoutOrganizationInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scoreJustification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutResumesNestedInput
@@ -813,6 +848,7 @@ export type ResumeUncheckedUpdateWithoutOrganizationInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scoreJustification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -824,6 +860,7 @@ export type ResumeUncheckedUpdateManyWithoutOrganizationInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scoreJustification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -835,6 +872,7 @@ export type ResumeCreateManyJobInput = {
   fileName: string
   path: string
   score?: number | null
+  scoreJustification?: string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
@@ -844,6 +882,7 @@ export type ResumeUpdateWithoutJobInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scoreJustification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutResumesNestedInput
@@ -857,6 +896,7 @@ export type ResumeUncheckedUpdateWithoutJobInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scoreJustification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -868,6 +908,7 @@ export type ResumeUncheckedUpdateManyWithoutJobInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scoreJustification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -882,6 +923,7 @@ export type ResumeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   fileName?: boolean
   path?: boolean
   score?: boolean
+  scoreJustification?: boolean
   questions?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.Resume$userArgs<ExtArgs>
@@ -897,6 +939,7 @@ export type ResumeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   fileName?: boolean
   path?: boolean
   score?: boolean
+  scoreJustification?: boolean
   questions?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.Resume$userArgs<ExtArgs>
@@ -912,6 +955,7 @@ export type ResumeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   fileName?: boolean
   path?: boolean
   score?: boolean
+  scoreJustification?: boolean
   questions?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.Resume$userArgs<ExtArgs>
@@ -927,11 +971,12 @@ export type ResumeSelectScalar = {
   fileName?: boolean
   path?: boolean
   score?: boolean
+  scoreJustification?: boolean
   questions?: boolean
   createdAt?: boolean
 }
 
-export type ResumeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "jobId" | "organizationId" | "fileName" | "path" | "score" | "questions" | "createdAt", ExtArgs["result"]["resume"]>
+export type ResumeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "jobId" | "organizationId" | "fileName" | "path" | "score" | "scoreJustification" | "questions" | "createdAt", ExtArgs["result"]["resume"]>
 export type ResumeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.Resume$userArgs<ExtArgs>
   job?: boolean | Prisma.Resume$jobArgs<ExtArgs>
@@ -963,6 +1008,7 @@ export type $ResumePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     fileName: string
     path: string
     score: number | null
+    scoreJustification: string | null
     questions: runtime.JsonValue | null
     createdAt: Date
   }, ExtArgs["result"]["resume"]>
@@ -1398,6 +1444,7 @@ export interface ResumeFieldRefs {
   readonly fileName: Prisma.FieldRef<"Resume", 'String'>
   readonly path: Prisma.FieldRef<"Resume", 'String'>
   readonly score: Prisma.FieldRef<"Resume", 'Int'>
+  readonly scoreJustification: Prisma.FieldRef<"Resume", 'String'>
   readonly questions: Prisma.FieldRef<"Resume", 'Json'>
   readonly createdAt: Prisma.FieldRef<"Resume", 'DateTime'>
 }

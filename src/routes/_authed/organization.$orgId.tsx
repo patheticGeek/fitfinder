@@ -184,6 +184,11 @@ function OrgPage() {
                                     <span className="text-sm text-gray-500 ml-2">
                                       by {r.user?.email ?? "unknown"}
                                     </span>
+                                    {r.scoreJustification && (
+                                      <div className="text-xs text-gray-400 mt-1 ml-4">
+                                        {r.scoreJustification}
+                                      </div>
+                                    )}
                                   </li>
                                 ))}
                               </ul>

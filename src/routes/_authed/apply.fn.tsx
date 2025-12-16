@@ -83,6 +83,7 @@ export const applyResumeFn = createServerFn({ method: "POST" })
             fileName,
             path: `/uploaded/${id}/resume.pdf`,
             score: geminiOut.score,
+            scoreJustification: geminiOut.scoreJustification,
             questions: geminiOut.questions,
             userId: user?.id ?? undefined,
             jobId: jobId ?? undefined,
@@ -97,6 +98,7 @@ export const applyResumeFn = createServerFn({ method: "POST" })
         id,
         path: `/uploaded/${id}/resume.pdf`,
         score: geminiOut.score,
+        scoreJustification: geminiOut.scoreJustification,
         questions: geminiOut.questions,
         jobId: jobId ?? null,
         orgId: orgId ?? null,
@@ -125,6 +127,7 @@ export const listJobsFn = createServerFn({ method: "GET" }).handler(
 
 const GeminiStructuredSchema = z.object({
   score: z.number().min(0).max(100),
+  scoreJustification: z.string(),
   questions: z.array(
     z.object({
       text: z.string(),
@@ -145,7 +148,10 @@ async function generateMatchAndQuestionsWithGemini(
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
   const prompt = `
-  Generate a match score and 5 short interview questions to test a candidate's knowledge based on the following resume and job description.
+  Generate a match score (0-100), a brief justification for that score, and 5 short interview questions to test a candidate's knowledge based on the following resume and job description.
+  
+  The scoreJustification should be a 2-3 sentence summary explaining why the candidate received this score, highlighting key matches or gaps between their experience and the job requirements.
+  
   <resume>\n${resumeText}\n</resume>
   <job-description>\n${jobDescription}\n</job-description>
   `.trim();
@@ -173,7 +179,11 @@ async function generateMatchAndQuestionsWithGemini(
       confidence: typeof q.confidence === "number" ? q.confidence : undefined,
     }));
 
-    return { score: Math.round(validated.score), questions };
+    return { 
+      score: Math.round(validated.score), 
+      scoreJustification: validated.scoreJustification,
+      questions 
+    };
   } catch (e: any) {
     throw new Error(
       `@google/genai invocation/parse failed: ${e?.message || String(e)}`

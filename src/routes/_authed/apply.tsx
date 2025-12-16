@@ -126,6 +126,12 @@ function ApplyPage() {
           <div>
             Match Score: <strong>{mutation.data.score}%</strong>
           </div>
+          {mutation.data.scoreJustification && (
+            <div className="mt-2">
+              <div className="font-semibold">Score Justification</div>
+              <p className="text-gray-300 mt-1">{mutation.data.scoreJustification}</p>
+            </div>
+          )}
           {mutation.data.questions && (
             <div className="mt-2">
               <div className="font-semibold">Generated Questions</div>

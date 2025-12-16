@@ -121,6 +121,7 @@ export const ResumeScalarFieldEnum = {
   fileName: 'fileName',
   path: 'path',
   score: 'score',
+  scoreJustification: 'scoreJustification',
   questions: 'questions',
   createdAt: 'createdAt'
 } as const
