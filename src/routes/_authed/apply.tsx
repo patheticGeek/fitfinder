@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import type React from "react";
 import { useState } from "react";
-import { applyResumeFn } from "./apply.fn";
+import { applyResumeFn, listJobsFn } from "./apply.fn";
 
 export const Route = createFileRoute("/_authed/apply")({
 	component: ApplyPage,
@@ -55,7 +55,7 @@ function ApplyPage() {
 			);
 		} catch (err) {
 			const msg = err instanceof Error ? err.message : String(err);
-			alert("Failed to read file: " + msg);
+			alert(`Failed to read file: ${msg}`);
 		}
 	};
 
@@ -86,7 +86,7 @@ function ApplyPage() {
 						<option value="">-- None / Custom Job Description --</option>
 						{jobsQuery.data?.jobs?.map((j) => (
 							<option key={j.id} value={j.id}>
-								{j.organization.name + " - " + (j.title ?? "Untitled")}
+								{`${j.organization.name} - ${j.title ?? "Untitled"}`}
 							</option>
 						))}
 					</select>
