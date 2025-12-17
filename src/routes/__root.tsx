@@ -101,7 +101,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 	const { user } = Route.useRouteContext();
 
 	return (
-		<html>
+		<html lang="en">
 			<head>
 				<HeadContent />
 			</head>

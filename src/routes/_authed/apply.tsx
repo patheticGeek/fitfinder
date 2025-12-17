@@ -64,8 +64,11 @@ function ApplyPage() {
 			<h2 className="text-xl font-bold mb-2">Apply</h2>
 			<form onSubmit={submit} className="space-y-3">
 				<div>
-					<label className="block font-medium">Select Job (required)</label>
+					<label htmlFor="job-select" className="block font-medium">
+						Select Job (required)
+					</label>
 					<select
+						id="job-select"
 						value={selectedJobId ?? ""}
 						onChange={(e) => {
 							const id = e.target.value || null;
@@ -92,16 +95,22 @@ function ApplyPage() {
 					</select>
 				</div>
 				<div>
-					<label className="block font-medium">Resume (PDF)</label>
+					<label htmlFor="resume-file" className="block font-medium">
+						Resume (PDF)
+					</label>
 					<input
+						id="resume-file"
 						accept="application/pdf"
 						onChange={(e) => setFile(e.target.files?.[0] ?? null)}
 						type="file"
 					/>
 				</div>
 				<div>
-					<label className="block font-medium">Job Description</label>
+					<label htmlFor="job-desc" className="block font-medium">
+						Job Description
+					</label>
 					<textarea
+						id="job-desc"
 						rows={6}
 						className="w-full border p-2"
 						value={jobDescription}
@@ -140,8 +149,8 @@ function ApplyPage() {
 						<div className="mt-2">
 							<div className="font-semibold">Generated Questions</div>
 							<ol className="list-decimal ml-6">
-								{mutation.data.questions.map((q, i) => (
-									<li key={i}>
+								{mutation.data.questions.map((q) => (
+									<li key={q.text}>
 										{q.text} - {q.topic} - {q.confidence}
 									</li>
 								))}

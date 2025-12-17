@@ -232,14 +232,21 @@ function OrganizationsPage() {
 				}}
 				className="mb-4"
 			>
-				<label className="block font-medium">Create Organization</label>
+				<label htmlFor="create-org-name" className="block font-medium">
+					Create Organization
+				</label>
 				<input
+					id="create-org-name"
+					name="name"
 					className="border p-2 w-full"
 					value={name}
 					onChange={(e) => setName(e.target.value)}
 				/>
 				<div className="mt-2">
-					<button className="px-3 py-1 bg-green-600 text-white rounded">
+					<button
+						type="submit"
+						className="px-3 py-1 bg-green-600 text-white rounded"
+					>
 						Create
 					</button>
 				</div>
@@ -258,13 +265,17 @@ function OrganizationsPage() {
 				) : listQuery.isError ? (
 					<div className="text-red-400">
 						Failed to load organizations.{" "}
-						<button className="underline" onClick={() => listQuery.refetch()}>
+						<button
+							type="button"
+							className="underline"
+							onClick={() => listQuery.refetch()}
+						>
 							Retry
 						</button>
 					</div>
 				) : listQuery.data?.orgs?.length ? (
 					<ul className="space-y-3 mt-2">
-						{listQuery.data.orgs.map((o: any) => (
+						{listQuery.data.orgs.map((o) => (
 							<li key={o.id} className="p-3 border rounded">
 								<div className="flex justify-between">
 									<div>

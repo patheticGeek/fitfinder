@@ -98,9 +98,9 @@ function OrgPage() {
 				</div>
 			) : (
 				<div>
-					<div className="font-semibold text-lg">{org!.name}</div>
+					<div className="font-semibold text-lg">{org?.name}</div>
 					<div className="text-sm text-gray-500">
-						Members: {org!.members.length}
+						Members: {org?.members.length}
 					</div>
 
 					<div className="mt-3 flex gap-3">
@@ -130,9 +130,9 @@ function OrgPage() {
 
 					<div className="mt-4">
 						<div className="font-semibold">Jobs</div>
-						{org!.jobs.length ? (
+						{org?.jobs.length ? (
 							<ul className="mt-2 space-y-3">
-								{org!.jobs.map((j) => {
+								{org?.jobs.map((j) => {
 									const expanded = expandedJobId === j.id;
 									return (
 										<li key={j.id} className="p-3 border rounded">

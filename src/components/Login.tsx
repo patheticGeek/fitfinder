@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import type { MouseEvent } from "react";
 import { loginFn } from "~/routes/_authed";
 import { signupFn } from "~/routes/signup";
 import { Auth } from "./Auth";
@@ -45,10 +46,10 @@ export function Login() {
 							<div>
 								<button
 									className="text-blue-500"
-									onClick={(e) => {
-										const formData = new FormData(
-											(e.target as HTMLButtonElement).form!,
-										);
+									onClick={(e: MouseEvent<HTMLButtonElement>) => {
+										const form = e.currentTarget.form;
+										if (!form) return;
+										const formData = new FormData(form);
 
 										signupMutation.mutate({
 											data: {
