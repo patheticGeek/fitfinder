@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+import "@fontsource-variable/noto-sans";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
@@ -105,7 +106,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			<head>
 				<HeadContent />
 			</head>
-			<body>
+			<body className="dark">
 				<Header email={user?.email} />
 
 				{children}
