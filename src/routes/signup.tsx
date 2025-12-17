@@ -1,13 +1,18 @@
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { Auth } from "~/components/Auth";
 import { hashPassword, prismaClient } from "~/utils/prisma";
 import { getAppSession } from "~/utils/session";
 
 export const signupFn = createServerFn({ method: "POST" })
 	.inputValidator(
-		(d: { email: string; password: string; redirectUrl?: string }) => d,
+		z.object({
+			email: z.string().email(),
+			password: z.string().min(1),
+			redirectUrl: z.string().optional(),
+		}).parse,
 	)
 	.handler(async ({ data }) => {
 		// Check if the user already exists

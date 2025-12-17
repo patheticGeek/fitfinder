@@ -8,15 +8,6 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import { prismaClient } from "~/utils/prisma";
 import { getAppSession } from "~/utils/session";
 
-type ApplyInput = {
-	fileName: string;
-	mimeType: string;
-	contentBase64: string;
-	jobDescription?: string;
-	jobId?: string;
-	orgId?: string;
-};
-
 const ApplySchema = z.object({
 	fileName: z.string().min(1),
 	mimeType: z.string().regex(/^application\/pdf$/i),
@@ -27,7 +18,7 @@ const ApplySchema = z.object({
 });
 
 export const applyResumeFn = createServerFn({ method: "POST" })
-	.inputValidator((d: ApplyInput) => d)
+	.inputValidator(ApplySchema.parse)
 	.handler(async ({ data }) => {
 		try {
 			if (data == null) {
@@ -37,12 +28,8 @@ export const applyResumeFn = createServerFn({ method: "POST" })
 				};
 			}
 
-			const parsed = ApplySchema.safeParse(data);
-			if (!parsed.success) {
-				return { error: true, message: parsed.error.message };
-			}
 			const { fileName, contentBase64, jobDescription, jobId, orgId } =
-				parsed.data;
+				ApplySchema.parse(data);
 
 			const session = await getAppSession();
 			const userEmail = session?.data?.userEmail;

@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
+import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import Container from "~/components/ui/container";
@@ -16,8 +17,10 @@ import {
 	deleteOrgFn,
 } from "./organizations";
 
+const GetOrganizationSchema = z.object({ orgId: z.string() });
+
 export const getOrganizationFn = createServerFn({ method: "GET" })
-	.inputValidator((d: { orgId: string }) => d)
+	.inputValidator(GetOrganizationSchema.parse)
 	.handler(async ({ data }) => {
 		const session = await getAppSession();
 		const userEmail = session.data?.userEmail;

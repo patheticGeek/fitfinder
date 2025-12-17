@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
+import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import Container from "~/components/ui/container";
@@ -9,9 +10,22 @@ import { Input } from "~/components/ui/input";
 import { prismaClient } from "~/utils/prisma";
 import { getAppSession } from "~/utils/session";
 
+const CreateOrgSchema = z.object({ name: z.string().min(1) });
+const AddAdminSchema = z.object({
+	orgId: z.string(),
+	userEmail: z.string().email(),
+});
+const CreateJobSchema = z.object({
+	orgId: z.string(),
+	title: z.string().min(1),
+	description: z.string(),
+});
+const DeleteJobSchema = z.object({ jobId: z.string() });
+const DeleteOrgSchema = z.object({ orgId: z.string() });
+
 // Server functions inlined into this route file
 export const createOrganizationFn = createServerFn({ method: "POST" })
-	.inputValidator((d: { name: string }) => d)
+	.inputValidator(CreateOrgSchema.parse)
 	.handler(async ({ data }) => {
 		const session = await getAppSession();
 		const userEmail = session?.data?.userEmail;
@@ -63,7 +77,7 @@ export const listOrganizationsFn = createServerFn({ method: "GET" }).handler(
 );
 
 export const addAdminFn = createServerFn({ method: "POST" })
-	.inputValidator((d: { orgId: string; userEmail: string }) => d)
+	.inputValidator(AddAdminSchema.parse)
 	.handler(async ({ data }) => {
 		const session = await getAppSession();
 		const userEmail = session?.data?.userEmail;
@@ -104,9 +118,7 @@ export const addAdminFn = createServerFn({ method: "POST" })
 	});
 
 export const createJobFn = createServerFn({ method: "POST" })
-	.inputValidator(
-		(d: { orgId: string; title: string; description: string }) => d,
-	)
+	.inputValidator(CreateJobSchema.parse)
 	.handler(async ({ data }) => {
 		const session = await getAppSession();
 		const userEmail = session?.data?.userEmail;
@@ -137,7 +149,7 @@ export const createJobFn = createServerFn({ method: "POST" })
 	});
 
 export const deleteJobFn = createServerFn({ method: "POST" })
-	.inputValidator((d: { jobId: string }) => d)
+	.inputValidator(DeleteJobSchema.parse)
 	.handler(async ({ data }) => {
 		const session = await getAppSession();
 		const userEmail = session?.data?.userEmail;
@@ -170,7 +182,7 @@ export const deleteJobFn = createServerFn({ method: "POST" })
 	});
 
 export const deleteOrgFn = createServerFn({ method: "POST" })
-	.inputValidator((d: { orgId: string }) => d)
+	.inputValidator(DeleteOrgSchema.parse)
 	.handler(async ({ data }) => {
 		const session = await getAppSession();
 		const userEmail = session?.data?.userEmail;
