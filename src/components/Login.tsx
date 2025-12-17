@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import type { MouseEvent } from "react";
+import { Button } from "~/components/ui/button";
 import { loginFn } from "~/routes/_authed";
 import { signupFn } from "~/routes/signup";
 import { Auth } from "./Auth";
@@ -44,8 +45,8 @@ export function Login() {
 						<div className="text-red-400">{loginMutation.data.message}</div>
 						{loginMutation.data.userNotFound ? (
 							<div>
-								<button
-									className="text-blue-500"
+								<Button
+									className="bg-transparent text-cyan-600 hover:bg-transparent p-0"
 									onClick={(e: MouseEvent<HTMLButtonElement>) => {
 										const form = e.currentTarget.form;
 										if (!form) return;
@@ -61,7 +62,7 @@ export function Login() {
 									type="button"
 								>
 									Sign up instead?
-								</button>
+								</Button>
 							</div>
 						) : null}
 					</>

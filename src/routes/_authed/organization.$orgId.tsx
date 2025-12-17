@@ -2,6 +2,11 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader } from "~/components/ui/card";
+import Container from "~/components/ui/container";
+import { Input } from "~/components/ui/input";
+import { Textarea } from "~/components/ui/textarea";
 import { prismaClient } from "~/utils/prisma";
 import { getAppSession } from "~/utils/session";
 import {
@@ -73,7 +78,7 @@ function OrgPage() {
 	}
 
 	return (
-		<div className="p-4 max-w-4xl">
+		<Container size="md">
 			<h2 className="text-xl font-bold mb-2">Organization</h2>
 			{q.isLoading ? (
 				<div className="space-y-3">
@@ -104,9 +109,9 @@ function OrgPage() {
 					</div>
 
 					<div className="mt-3 flex gap-3">
-						<button
-							type="button"
-							className="px-2 py-1 bg-red-600 text-white rounded"
+						<Button
+							variant={confirmDelete ? "destructive" : "outline"}
+							size="sm"
 							onClick={() => {
 								if (!confirmDelete) {
 									setConfirmDelete(true);
@@ -125,7 +130,7 @@ function OrgPage() {
 							}}
 						>
 							{confirmDelete ? "Confirm Delete Org" : "Delete Org"}
-						</button>
+						</Button>
 					</div>
 
 					<div className="mt-4">
@@ -135,108 +140,111 @@ function OrgPage() {
 								{org?.jobs.map((j) => {
 									const expanded = expandedJobId === j.id;
 									return (
-										<li key={j.id} className="p-3 border rounded">
-											<div className="flex justify-between items-center">
-												<div className="font-medium">
-													{j.title ?? "Untitled"}
-												</div>
-												<div className="flex items-center gap-2">
-													<button
-														type="button"
-														className="px-2 py-1 bg-gray-700 text-white rounded text-sm"
-														onClick={() =>
-															setExpandedJobId(expanded ? null : j.id)
-														}
-													>
-														{expanded ? "Collapse" : "Details"}
-													</button>
-													<button
-														type="button"
-														className="px-2 py-1 bg-red-600 text-white rounded text-sm"
-														onClick={async () => {
-															if (
-																!confirm("Delete job? This cannot be undone.")
-															)
-																return;
-															deleteJobMutation.mutate(
-																{ data: { jobId: j.id } },
-																{ onSuccess: () => refresh() },
-															);
-														}}
-													>
-														Delete
-													</button>
-												</div>
-											</div>
-
-											{expanded && (
-												<div className="mt-2">
-													<div className="text-sm text-gray-200 mb-2">
-														{j.description}
+										<li key={j.id}>
+											<Card>
+												<CardHeader>
+													<div className="flex items-center justify-between w-full">
+														<div className="font-medium">
+															{j.title ?? "Untitled"}
+														</div>
+														<div className="flex items-center gap-2">
+															<Button
+																size="sm"
+																variant="ghost"
+																onClick={() =>
+																	setExpandedJobId(expanded ? null : j.id)
+																}
+															>
+																{expanded ? "Collapse" : "Details"}
+															</Button>
+															<Button
+																size="sm"
+																variant="destructive"
+																onClick={async () => {
+																	if (
+																		!confirm(
+																			"Delete job? This cannot be undone.",
+																		)
+																	)
+																		return;
+																	deleteJobMutation.mutate(
+																		{ data: { jobId: j.id } },
+																		{ onSuccess: () => refresh() },
+																	);
+																}}
+															>
+																Delete
+															</Button>
+														</div>
 													</div>
+												</CardHeader>
 
-													<div>
-														<div className="font-medium">Resumes</div>
-														{j.resumes.length ? (
-															<ul className="list-disc ml-6 mt-1">
-																{j.resumes.map((r) => (
-																	<li key={r.id} className="mt-1">
-																		<a
-																			href={r.path}
-																			className="text-blue-400 mr-2"
-																		>
-																			{r.fileName}
-																		</a>
-																		<span className="text-sm text-gray-300">
-																			Score: {r.score ?? "-"}%
-																		</span>
-																		<span className="text-sm text-gray-500 ml-2">
-																			by {r.user?.email ?? "unknown"}
-																		</span>
-																		{r.scoreJustification && (
-																			<div className="text-xs text-gray-400 mt-1 ml-4">
-																				{r.scoreJustification}
-																			</div>
-																		)}
-																	</li>
-																))}
-															</ul>
-														) : (
-															<div className="text-gray-500">
-																No resumes for this job
-															</div>
-														)}
-													</div>
-												</div>
-											)}
+												{expanded && (
+													<CardContent>
+														<div className="text-sm text-muted-foreground mb-2">
+															{j.description}
+														</div>
+
+														<div>
+															<div className="font-medium">Resumes</div>
+															{j.resumes.length ? (
+																<ul className="list-disc ml-6 mt-1">
+																	{j.resumes.map((r) => (
+																		<li key={r.id} className="mt-1">
+																			<a
+																				href={r.path}
+																				className="text-cyan-400 mr-2"
+																			>
+																				{r.fileName}
+																			</a>
+																			<span className="text-sm text-muted-foreground">
+																				Score: {r.score ?? "-"}%
+																			</span>
+																			<span className="text-sm text-muted-foreground ml-2">
+																				by {r.user?.email ?? "unknown"}
+																			</span>
+																			{r.scoreJustification && (
+																				<div className="text-xs text-muted-foreground mt-1 ml-4">
+																					{r.scoreJustification}
+																				</div>
+																			)}
+																		</li>
+																	))}
+																</ul>
+															) : (
+																<div className="text-muted-foreground">
+																	No resumes for this job
+																</div>
+															)}
+														</div>
+													</CardContent>
+												)}
+											</Card>
 										</li>
 									);
 								})}
 							</ul>
 						) : (
-							<div className="text-gray-500 mt-2">No jobs yet</div>
+							<div className="text-muted-foreground mt-2">No jobs yet</div>
 						)}
 					</div>
 
 					<div className="mt-6">
 						<div className="font-semibold">Create Job</div>
 						<div className="mt-2">
-							<input
-								className="w-full border p-2 mb-2"
+							<Input
 								placeholder="Job title"
 								value={jobTitle}
 								onChange={(e) => setJobTitle(e.target.value)}
 							/>
-							<textarea
-								className="w-full border p-2 mb-2"
+							<Textarea
 								placeholder="Job description"
 								value={jobDesc}
 								onChange={(e) => setJobDesc(e.target.value)}
+								className="mt-2"
 							/>
-							<div>
-								<button
-									type="button"
-									className="px-3 py-1 bg-indigo-600 text-white rounded"
+							<div className="mt-3">
+								<Button
 									onClick={(e) => {
 										e.preventDefault();
 										if (!jobTitle) return alert("Enter job title");
@@ -256,7 +264,7 @@ function OrgPage() {
 									}}
 								>
 									Create Job
-								</button>
+								</Button>
 							</div>
 						</div>
 					</div>
@@ -279,23 +287,20 @@ function OrgPage() {
 							}}
 						>
 							<div className="flex gap-2 mt-2">
-								<input
+								<Input
 									value={adminEmail}
 									onChange={(e) => setAdminEmail(e.target.value)}
-									className="border p-2 flex-1"
+									className="flex-1"
 									placeholder="user@example.com"
 								/>
-								<button
-									type="submit"
-									className="px-2 py-1 bg-yellow-600 text-white rounded"
-								>
+								<Button type="submit" variant="secondary" size="sm">
 									Add Admin
-								</button>
+								</Button>
 							</div>
 						</form>
 					</div>
 				</div>
 			)}
-		</div>
+		</Container>
 	);
 }

@@ -3,6 +3,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import type React from "react";
 import { useState } from "react";
+import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
+import Container from "~/components/ui/container";
+import { Textarea } from "~/components/ui/textarea";
 import { applyResumeFn, listJobsFn } from "./apply.fn";
 
 export const Route = createFileRoute("/_authed/apply")({
@@ -60,77 +64,83 @@ function ApplyPage() {
 	};
 
 	return (
-		<div className="p-4 max-w-2xl">
-			<h2 className="text-xl font-bold mb-2">Apply</h2>
-			<form onSubmit={submit} className="space-y-3">
+		<Container size="md">
+			<Card className="mb-4">
+				<h2 className="text-xl font-bold mb-2">Apply</h2>
 				<div>
-					<label htmlFor="job-select" className="block font-medium">
-						Select Job (required)
-					</label>
-					<select
-						id="job-select"
-						value={selectedJobId ?? ""}
-						onChange={(e) => {
-							const id = e.target.value || null;
-							setSelectedJobId(id);
-							if (!id) {
-								setSelectedOrgId(null);
-								setJobDescription("");
-								return;
-							}
-							const job = jobsQuery.data?.jobs?.find((j) => j.id === id);
-							if (job) {
-								setSelectedOrgId(job.organization?.id ?? null);
-								setJobDescription(job.description ?? "");
-							}
-						}}
-						className="border p-2 w-full"
-					>
-						<option value="">-- None / Custom Job Description --</option>
-						{jobsQuery.data?.jobs?.map((j) => (
-							<option key={j.id} value={j.id}>
-								{`${j.organization.name} - ${j.title ?? "Untitled"}`}
-							</option>
-						))}
-					</select>
-				</div>
-				<div>
-					<label htmlFor="resume-file" className="block font-medium">
-						Resume (PDF)
-					</label>
-					<input
-						id="resume-file"
-						accept="application/pdf"
-						onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-						type="file"
-					/>
-				</div>
-				<div>
-					<label htmlFor="job-desc" className="block font-medium">
-						Job Description
-					</label>
-					<textarea
-						id="job-desc"
-						rows={6}
-						className="w-full border p-2"
-						value={jobDescription}
-						onChange={(e) => setJobDescription(e.target.value)}
-					/>
-				</div>
+					<form onSubmit={submit} className="space-y-3">
+						<div>
+							<label htmlFor="job-select" className="block font-medium">
+								Select Job (required)
+							</label>
+							<div>
+								<select
+									id="job-select"
+									value={selectedJobId ?? ""}
+									onChange={(e) => {
+										const id = e.target.value || null;
+										setSelectedJobId(id);
+										if (!id) {
+											setSelectedOrgId(null);
+											setJobDescription("");
+											return;
+										}
+										const job = jobsQuery.data?.jobs?.find((j) => j.id === id);
+										if (job) {
+											setSelectedOrgId(job.organization?.id ?? null);
+											setJobDescription(job.description ?? "");
+										}
+									}}
+									className="w-full rounded-none border px-2.5 py-1 text-xs"
+								>
+									<option value="">-- None / Custom Job Description --</option>
+									{jobsQuery.data?.jobs?.map((j) => (
+										<option key={j.id} value={j.id}>
+											{`${j.organization.name} - ${j.title ?? "Untitled"}`}
+										</option>
+									))}
+								</select>
+							</div>
+						</div>
+						<div>
+							<label htmlFor="resume-file" className="block font-medium">
+								Resume (PDF)
+							</label>
+							<input
+								id="resume-file"
+								accept="application/pdf"
+								onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+								type="file"
+								className="mt-1"
+							/>
+						</div>
+						<div>
+							<label htmlFor="job-desc" className="block font-medium">
+								Job Description
+							</label>
+							<Textarea
+								id="job-desc"
+								rows={6}
+								value={jobDescription}
+								onChange={(e) => setJobDescription(e.target.value)}
+							/>
+						</div>
 
-				<div>
-					<button
-						type="submit"
-						className="px-3 py-1 bg-blue-600 text-white rounded"
-						disabled={mutation.isPending}
-					>
-						{mutation.isPending ? "Uploading..." : "Apply and Analyze"}
-					</button>
+						<div>
+							<Button
+								type="submit"
+								className="w-full"
+								disabled={mutation.isPending}
+							>
+								{mutation.isPending ? "Uploading..." : "Apply and Analyze"}
+							</Button>
+						</div>
+					</form>
 				</div>
-			</form>
+			</Card>
 
 			{mutation.data ? (
-				<div className="mt-4 p-3 border rounded bg-gray-900">
+				<Card className="mt-4 bg-gray-900 text-white">
 					<div>
 						Saved id: <strong>{mutation.data.id}</strong>
 					</div>
@@ -157,9 +167,9 @@ function ApplyPage() {
 							</ol>
 						</div>
 					)}
-				</div>
+				</Card>
 			) : null}
-		</div>
+		</Container>
 	);
 }
 

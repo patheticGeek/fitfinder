@@ -2,6 +2,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import Container from "~/components/ui/container";
+import { Input } from "~/components/ui/input";
 import { prismaClient } from "~/utils/prisma";
 import { getAppSession } from "~/utils/session";
 
@@ -214,43 +218,38 @@ function OrganizationsPage() {
 	}
 
 	return (
-		<div className="p-4 max-w-3xl">
+		<Container size="md">
 			<h2 className="text-xl font-bold mb-2">Organizations</h2>
 
-			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					createMutation.mutate(
-						{ data: { name } },
-						{
-							onSuccess: () => {
-								setName("");
-								refresh();
+			<Card className="mb-4">
+				<form
+					onSubmit={(e) => {
+						e.preventDefault();
+						createMutation.mutate(
+							{ data: { name } },
+							{
+								onSuccess: () => {
+									setName("");
+									refresh();
+								},
 							},
-						},
-					);
-				}}
-				className="mb-4"
-			>
-				<label htmlFor="create-org-name" className="block font-medium">
-					Create Organization
-				</label>
-				<input
-					id="create-org-name"
-					name="name"
-					className="border p-2 w-full"
-					value={name}
-					onChange={(e) => setName(e.target.value)}
-				/>
-				<div className="mt-2">
-					<button
-						type="submit"
-						className="px-3 py-1 bg-green-600 text-white rounded"
-					>
-						Create
-					</button>
-				</div>
-			</form>
+						);
+					}}
+				>
+					<label htmlFor="create-org-name" className="block font-medium">
+						Create Organization
+					</label>
+					<Input
+						id="create-org-name"
+						name="name"
+						value={name}
+						onChange={(e) => setName(e.target.value)}
+					/>
+					<div className="mt-2">
+						<Button type="submit">Create</Button>
+					</div>
+				</form>
+			</Card>
 
 			<div>
 				<h3 className="font-semibold">Your Organizations</h3>
@@ -276,24 +275,32 @@ function OrganizationsPage() {
 				) : listQuery.data?.orgs?.length ? (
 					<ul className="space-y-3 mt-2">
 						{listQuery.data.orgs.map((o) => (
-							<li key={o.id} className="p-3 border rounded">
-								<div className="flex justify-between">
-									<div>
-										<div className="font-semibold">{o.name}</div>
-										<div className="text-sm text-gray-400">
-											Members: {o.members.length}
+							<li key={o.id}>
+								<Card>
+									<CardHeader>
+										<div className="flex items-center justify-between w-full">
+											<div>
+												<CardTitle>{o.name}</CardTitle>
+												<div className="text-sm text-muted-foreground">
+													Members: {o.members.length}
+												</div>
+											</div>
+											<div>
+												<Link
+													to={`/organization/$orgId`}
+													params={{ orgId: o.id }}
+												>
+													<Button size="sm">Manage</Button>
+												</Link>
+											</div>
 										</div>
-									</div>
-									<div>
-										<Link
-											to={`/organization/$orgId`}
-											params={{ orgId: o.id }}
-											className="px-2 py-1 bg-blue-600 text-white rounded"
-										>
-											Manage
-										</Link>
-									</div>
-								</div>
+									</CardHeader>
+									<CardContent>
+										<div className="text-xs text-muted-foreground">
+											Jobs: {o.jobs.length}
+										</div>
+									</CardContent>
+								</Card>
 							</li>
 						))}
 					</ul>
@@ -301,6 +308,6 @@ function OrganizationsPage() {
 					<div className="text-gray-500 mt-2">No organizations yet</div>
 				)}
 			</div>
-		</div>
+		</Container>
 	);
 }
