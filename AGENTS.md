@@ -76,6 +76,9 @@ Server functions are defined with `.fn.tsx` files in route directories:
   - `addAdminFn`: Adds admins (requires existing admin permission)
   - `createJobFn`: Creates jobs in organizations (admin only)
 
+ - **`src/routes/_authed/organization.$orgId.job.$jobId.candidates.tsx`**: Job candidates view
+   - `getJobCandidatesFn`: Returns a job with its `resumes` (includes `user`) and is used by the candidates page to list applicants for a job.
+
 ### AI Integration
 
 Resume analysis flow:
@@ -119,6 +122,12 @@ Uses TanStack Query for all server state:
 - `src/utils/session.ts`: Session helper with type-safe user data
 - `prisma/schema.prisma`: Database schema (generates to `src/prisma-generated/`)
 - `vite.config.ts`: Vite config with TanStack Start, Nitro, and path aliases
+
+- `src/routes/_authed/organization.$orgId.job.$jobId.candidates.tsx`: Candidates page that lists applicants for a job and uses `getJobCandidatesFn` on the server.
+
+- `src/routes/_authed/organization.$orgId.tsx`: Organization page that includes a `View Candidates` `Link` for each job which navigates to the candidates page.
+
+These features use typed imports from `src/prisma-generated/browser` (`Job`, `Resume`, `User`) and avoid `any` in UI code.
 
 ## Path Aliases
 
