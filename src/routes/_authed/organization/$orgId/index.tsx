@@ -207,7 +207,7 @@ function OrgPage() {
 													</div>
 
 													{expanded && (
-														<div className="text-sm text-muted-foreground my-2">
+														<div className="text-sm text-muted-foreground my-2 whitespace-pre-wrap">
 															{j.description}
 														</div>
 													)}
