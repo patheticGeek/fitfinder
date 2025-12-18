@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	createFileRoute,
 	Link,
@@ -38,11 +38,11 @@ export const getOrganizationFn = createServerFn({ method: "GET" })
 				jobs: { include: { resumes: { include: { user: true } } } },
 				resumes: true,
 			},
-		})
+		});
 
 		if (!org) return { error: true, message: "Organization not found" };
 		return { org };
-	})
+	});
 
 export const Route = createFileRoute("/_authed/organization/$orgId/")({
 	component: OrgPage,
@@ -54,7 +54,7 @@ function OrgPage() {
 	const orgId = useMatch({
 		from: "/_authed/organization/$orgId/",
 		select: (s) => s.params.orgId,
-	})
+	});
 
 	const server = useServerFn(getOrganizationFn);
 	const q = useQuery({
@@ -63,7 +63,7 @@ function OrgPage() {
 			const res = await server({ data: { orgId } });
 			return res;
 		},
-	})
+	});
 
 	const org = q.data?.org;
 	const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
@@ -74,14 +74,15 @@ function OrgPage() {
 
 	const createJobMutation = useMutation({
 		mutationFn: useServerFn(createJobFn),
-	})
+	});
 	const addAdminMutation = useMutation({ mutationFn: useServerFn(addAdminFn) });
 	const deleteJobMutation = useMutation({
 		mutationFn: useServerFn(deleteJobFn),
-	})
+	});
 	const deleteOrgMutation = useMutation({
 		mutationFn: useServerFn(deleteOrgFn),
-	})
+	});
+	const queryClient = useQueryClient();
 
 	function refresh() {
 		q.refetch();
@@ -123,19 +124,22 @@ function OrgPage() {
 							size="sm"
 							onClick={() => {
 								if (!confirmDelete) {
-									setConfirmDelete(true)
+									setConfirmDelete(true);
 									setTimeout(() => setConfirmDelete(false), 5000);
-									return
+									return;
 								}
 
 								deleteOrgMutation.mutate(
 									{ data: { orgId } },
 									{
 										onSuccess: () => {
+											queryClient.invalidateQueries({
+												queryKey: ["organizations"],
+											});
 											router.navigate({ to: "/organizations" });
 										},
 									},
-								)
+								);
 							}}
 						>
 							{confirmDelete ? "Confirm Delete Org" : "Delete Org"}
@@ -153,7 +157,7 @@ function OrgPage() {
 											<Card>
 												<CardHeader>
 													<div className="flex items-center justify-between w-full">
-														<div className="font-medium">
+														<div className="text-lg font-medium">
 															{j.title ?? "Untitled"}
 														</div>
 														<div className="flex items-center gap-2">
@@ -183,11 +187,11 @@ function OrgPage() {
 																			"Delete job? This cannot be undone.",
 																		)
 																	)
-																		return
+																		return;
 																	deleteJobMutation.mutate(
 																		{ data: { jobId: j.id } },
 																		{ onSuccess: () => refresh() },
-																	)
+																	);
 																}}
 															>
 																Delete
@@ -196,25 +200,21 @@ function OrgPage() {
 													</div>
 												</CardHeader>
 
-												{expanded && (
-													<CardContent>
-														<div className="text-sm text-muted-foreground mb-2">
+												<CardContent>
+													<div className="text-sm text-muted-foreground mt-1">
+														{j.resumes.length} applicant
+														{j.resumes.length === 1 ? "" : "s"}
+													</div>
+
+													{expanded && (
+														<div className="text-sm text-muted-foreground my-2">
 															{j.description}
 														</div>
-
-														<div>
-															<div className="font-medium">Applicants</div>
-															<div className="text-sm text-muted-foreground mt-1">
-																{j.resumes.length} applicant
-																{j.resumes.length === 1 ? "" : "s"}. Use "View
-																Candidates" to see details.
-															</div>
-														</div>
-													</CardContent>
-												)}
+													)}
+												</CardContent>
 											</Card>
 										</li>
-									)
+									);
 								})}
 							</ul>
 						) : (
@@ -239,7 +239,7 @@ function OrgPage() {
 							<div className="mt-3">
 								<Button
 									onClick={(e) => {
-										e.preventDefault()
+										e.preventDefault();
 										if (!jobTitle) return alert("Enter job title");
 										if (!jobDesc) return alert("Enter job description");
 										createJobMutation.mutate(
@@ -248,12 +248,12 @@ function OrgPage() {
 											},
 											{
 												onSuccess: () => {
-													setJobTitle("")
-													setJobDesc("")
-													refresh()
+													setJobTitle("");
+													setJobDesc("");
+													refresh();
 												},
 											},
-										)
+										);
 									}}
 								>
 									Create Job
@@ -266,17 +266,17 @@ function OrgPage() {
 						<div className="font-semibold">Add Admin</div>
 						<form
 							onSubmit={(e) => {
-								e.preventDefault()
+								e.preventDefault();
 								if (!adminEmail) return alert("Enter an email");
 								addAdminMutation.mutate(
 									{ data: { orgId, userEmail: adminEmail } },
 									{
 										onSuccess: () => {
-											setAdminEmail("")
-											refresh()
+											setAdminEmail("");
+											refresh();
 										},
 									},
-								)
+								);
 							}}
 						>
 							<div className="flex gap-2 mt-2">
@@ -295,5 +295,5 @@ function OrgPage() {
 				</div>
 			)}
 		</Container>
-	)
+	);
 }

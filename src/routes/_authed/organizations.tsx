@@ -258,7 +258,9 @@ function OrganizationsPage() {
 						onChange={(e) => setName(e.target.value)}
 					/>
 					<div className="mt-2">
-						<Button type="submit">Create</Button>
+						<Button type="submit" disabled={createMutation.isPending}>
+							{createMutation.isPending ? "Creating..." : "Create"}
+						</Button>
 					</div>
 				</form>
 			</Card>
@@ -293,9 +295,6 @@ function OrganizationsPage() {
 										<div className="flex items-center justify-between w-full">
 											<div>
 												<CardTitle>{o.name}</CardTitle>
-												<div className="text-sm text-muted-foreground">
-													Members: {o.members.length}
-												</div>
 											</div>
 											<div>
 												<Link
@@ -308,7 +307,10 @@ function OrganizationsPage() {
 										</div>
 									</CardHeader>
 									<CardContent>
-										<div className="text-xs text-muted-foreground">
+										<div className="text-sm text-muted-foreground">
+											Members: {o.members.length}
+										</div>
+										<div className="text-s text-muted-foreground">
 											Jobs: {o.jobs.length}
 										</div>
 									</CardContent>
