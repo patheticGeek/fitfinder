@@ -92,11 +92,6 @@ function CandidatesPage() {
 											{r.scoreJustification}
 										</div>
 									)}
-									<div className="mt-3">
-										<a href={r.path} className="text-cyan-400">
-											View Resume File
-										</a>
-									</div>
 								</CardContent>
 							</Card>
 						))
