@@ -6,7 +6,7 @@ import {
 	IconSelector,
 } from "@tabler/icons-react";
 import type * as React from "react";
-import { cn } from "~/lib/cn";
+import { cn } from "~/utils/cn";
 
 const Select = SelectPrimitive.Root;
 
