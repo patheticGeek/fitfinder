@@ -6,131 +6,26 @@ Keep this updated as the codebase evolves.
 
 ## Project Overview
 
-FitFinder is a resume screening application that helps employers analyze candidate-job fit using AI. It allows users to upload resume PDFs, compare them against job descriptions, get match scores (0-100), and automatically generate interview questions using Google's Gemini AI.
+FitFinder helps employers judge candidate fit by comparing uploaded resumes against job descriptions, scoring them, and drafting interview questions with Gemini.
 
-## Commands
+## What to Know
 
-### Development
+- Product pillars: resume upload, AI-driven match scoring (0-100), concise justification, and auto-generated interview prompts per job.
+- Architecture: TanStack Start + React UI, server functions for data/AI work, Prisma + Postgres for multi-tenant storage, Vite build.
+- Data model (high level): users, organizations, memberships with admin flag, jobs under organizations, resumes tied to both job and user and storing AI outputs.
+- AI loop: extract text from PDF, send to Gemini with job context, persist score/justification/questions on the resume record.
+- Auth/session: email-password with PBKDF2, session via encrypted cookies, routes gate on presence of a user in context.
+- Client data flow: TanStack Query with tRPC for mutations/queries; router wires SSR and query client.
 
-```bash
-# Install dependencies
-pnpm install
+## Working in the Repo
 
-# Start development server (runs on port 3000)
-pnpm dev
+- Install and run: `pnpm install`, `pnpm dev`; build/preview with `pnpm build` and `pnpm preview`; start prod server with `pnpm start`.
+- Database: Prisma schema lives in `prisma/schema.prisma`; client output in `src/prisma-generated/`; migrations under `prisma/migrations/`. Common tasks: generate client, create/apply migrations, open Prisma Studio.
+- Key entry points: router setup in `src/router.tsx`; Prisma/session helpers in `src/utils/`; main routes and server functions under `src/routes/` (notably apply flow and organization/job/candidate views).
+- Paths: TypeScript alias `~/` points to `src/`.
 
-# Build for production
-pnpm build
+## Behavior Expectations
 
-# Preview production build
-pnpm preview
-
-# Start production server
-pnpm start
-```
-
-### Database
-
-```bash
-# Generate Prisma client (outputs to src/prisma-generated/)
-pnpm prisma-generate
-
-# Create a new migration
-npx prisma migrate dev --name <migration_name>
-
-# Apply migrations to database
-npx prisma migrate deploy
-
-# Open Prisma Studio to view/edit data
-npx prisma studio
-```
-
-### Database Schema
-
-Multi-tenant structure with Organizations:
-
-- `User`: Email/password authentication
-- `Organization`: Company/team that has jobs and resumes
-- `OrganizationUser`: Junction table with isAdmin flag for permissions
-- `Job`: Job postings owned by organizations
-- `Resume`: Uploaded resumes with AI-generated score, scoreJustification, and questions (JSON)
-
-**Key relationships:**
-
-- Users can belong to multiple organizations
-- Resumes are linked to both Users and Jobs
-- Only organization admins can create jobs and add other admins
-
-### Server Functions (API Layer)
-
-Server functions are defined with `.fn.tsx` files in route directories:
-
-- **`src/routes/_authed/apply.fn.tsx`**: Resume upload and AI analysis
-  - `applyResumeFn`: Processes PDF, extracts text with `pdf-parse`, calls Gemini API
-  - `listJobsFn`: Fetches all jobs with organizations
-  - Uses Zod schemas for structured AI output validation
-
-- **`src/routes/_authed/organizations.fn.tsx`**: Organization management
-  - `createOrganizationFn`: Creates org with creator as admin
-  - `listOrganizationsFn`: Lists orgs user is a member of
-  - `addAdminFn`: Adds admins (requires existing admin permission)
-  - `createJobFn`: Creates jobs in organizations (admin only)
-
- - **`src/routes/_authed/organization.$orgId.job.$jobId.candidates.tsx`**: Job candidates view
-   - `getJobCandidatesFn`: Returns a job with its `resumes` (includes `user`) and is used by the candidates page to list applicants for a job.
-
-### AI Integration
-
-Resume analysis flow:
-
-1. User uploads PDF resume and selects a job
-2. Server extracts text from PDF using `pdf-parse`
-3. Text sent to Gemini with job description
-4. Gemini returns structured JSON with:
-   - `score` (0-100)
-   - `scoreJustification` (2-3 sentence explanation)
-   - `questions` (array of 5 interview questions with optional topic/confidence)
-5. Results stored in Resume record and returned to client
-
-**AI implementation details:**
-
-- Uses `gemini-flash-lite-latest` model
-- Structured output via `responseJsonSchema` with Zod validation
-- Schema conversion: `zod-to-json-schema` package
-
-### Authentication & Sessions
-
-- Password hashing: PBKDF2 with configurable salt (100,000 iterations, SHA-256)
-- Sessions: TanStack Start's `useSession()` with encrypted cookies
-- Session stores only user email
-- Root route fetches full user object from email on every request
-- Protected routes check `context.user` in `beforeLoad` hooks
-
-### State Management
-
-Uses TanStack Query for all server state:
-
-- Server functions wrapped with `useServerFn()` hook
-- Queries use `useQuery()` with query keys like `["jobs"]`, `["organization", orgId]`
-- Mutations use `useMutation()` for writes (create org, upload resume, etc.)
-- Query client configured in router with SSR integration
-
-## Key Files
-
-- `src/router.tsx`: Router configuration with QueryClient and SSR setup
-- `src/utils/prisma.ts`: Prisma client singleton and password hashing utility
-- `src/utils/session.ts`: Session helper with type-safe user data
-- `prisma/schema.prisma`: Database schema (generates to `src/prisma-generated/`)
-- `vite.config.ts`: Vite config with TanStack Start, Nitro, and path aliases
-
-- `src/routes/_authed/organization.$orgId.job.$jobId.candidates.tsx`: Candidates page that lists applicants for a job and uses `getJobCandidatesFn` on the server.
-
-- `src/routes/_authed/organization.$orgId.tsx`: Organization page that includes a `View Candidates` `Link` for each job which navigates to the candidates page.
-
-These features use typed imports from `src/prisma-generated/browser` (`Job`, `Resume`, `User`) and avoid `any` in UI code.
-
-## Path Aliases
-
-TypeScript paths configured in `tsconfig.json`:
-
-- `~/` maps to `src/` directory (e.g., `~/utils/prisma` → `src/utils/prisma`)
+- Favor type-safe imports from `src/prisma-generated/browser` in UI code; avoid `any`.
+- Keep tenant boundaries: operations scoped by organization; admin flag controls job and admin creation.
+- AI outputs are stored on resumes and surfaced in candidate views.
