@@ -2,6 +2,13 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo, useState } from "react";
+import type {
+	Education,
+	Experience,
+	InterviewQuestion,
+	Project,
+	Skill,
+} from "~/api/mutations/applyResume";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import Container from "~/components/ui/container";
@@ -28,7 +35,6 @@ export const Route = createFileRoute("/_authed/apply")({
 });
 
 function ApplyPage() {
-	const [jobDescription, setJobDescription] = useState("");
 	const [file, setFile] = useState<File | null>(null);
 	const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 	const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
@@ -53,6 +59,8 @@ function ApplyPage() {
 		return { jobsByOrg: byOrg, jobsById: byId };
 	}, [jobsQuery.data?.jobs]);
 
+	const selectedJob = selectedJobId ? jobsById[selectedJobId] : null;
+
 	const submit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!file) return alert("Please select a PDF resume");
@@ -66,7 +74,6 @@ function ApplyPage() {
 				fileName: file.name,
 				mimeType: file.type,
 				contentBase64,
-				jobDescription,
 				jobId: selectedJobId,
 				orgId: selectedOrgId ?? undefined,
 			});
@@ -106,13 +113,11 @@ function ApplyPage() {
 										setSelectedJobId(id);
 										if (!id) {
 											setSelectedOrgId(null);
-											setJobDescription("");
 											return;
 										}
 										const job = jobsById[id];
 										if (job) {
 											setSelectedOrgId(job.organization?.id ?? null);
-											setJobDescription(job.description ?? "");
 										}
 									}}
 								>
@@ -134,16 +139,20 @@ function ApplyPage() {
 								</Select>
 							</div>
 						</div>
+
 						<div>
-							{selectedJobId ? (
-								<div className="mt-2 text-sm">
-									<h3 className="text-xl font-semibold mb-1">
-										{jobsById[selectedJobId ?? ""]?.title}
+							{selectedJob ? (
+								<Card className="mt-2 p-4 bg-gray-50 dark:bg-gray-800">
+									<h3 className="text-lg font-semibold mb-2">
+										{selectedJob.title}
 									</h3>
-									<div className="mt-1 whitespace-pre-wrap">
-										{jobsById[selectedJobId ?? ""]?.description}
+									<div className="text-sm font-medium text-muted-foreground mb-2">
+										Job Description
 									</div>
-								</div>
+									<div className="text-sm whitespace-pre-wrap leading-relaxed">
+										{selectedJob.description}
+									</div>
+								</Card>
 							) : (
 								<div className="mt-2 text-sm text-gray-600">
 									No job selected
@@ -165,28 +174,159 @@ function ApplyPage() {
 			</Card>
 
 			{mutation.data ? (
-				<Card className="mt-4 bg-gray-900 text-white">
+				<Card className="mt-4 bg-gray-900 text-white space-y-4">
 					<div>
 						Saved id: <strong>{mutation.data.id}</strong>
 					</div>
 					<div>
 						Match Score: <strong>{mutation.data.score}%</strong>
 					</div>
+
 					{mutation.data.scoreJustification && (
-						<div className="mt-2">
+						<div>
 							<div className="font-semibold">Score Justification</div>
 							<p className="text-gray-300 mt-1">
 								{mutation.data.scoreJustification}
 							</p>
 						</div>
 					)}
-					{mutation.data.questions && (
-						<div className="mt-2">
-							<div className="font-semibold">Generated Questions</div>
-							<ol className="list-decimal ml-6">
-								{mutation.data.questions.map((q) => (
-									<li key={q.text}>
-										{q.text} - {q.topic} - {q.confidence}
+
+					{mutation.data.currentLocation && (
+						<div>
+							<div className="font-semibold">Location</div>
+							<p className="text-gray-300 mt-1">{mutation.data.currentLocation}</p>
+						</div>
+					)}
+
+					{mutation.data.totalExperienceMonths !== null &&
+						mutation.data.totalExperienceMonths !== undefined && (
+							<div>
+								<div className="font-semibold">Total Experience</div>
+								<p className="text-gray-300 mt-1">
+									{Math.floor(mutation.data.totalExperienceMonths / 12)} years{" "}
+									{mutation.data.totalExperienceMonths % 12} months
+								</p>
+							</div>
+						)}
+
+					{mutation.data.education && mutation.data.education.length > 0 && (
+						<div>
+							<div className="font-semibold mb-2">Education</div>
+							<div className="space-y-2">
+								{(mutation.data.education as Education[]).map((edu, idx) => (
+									<div key={`edu-${idx}`} className="text-sm">
+										<div className="font-medium text-gray-200">
+											{edu.degree || "Degree"} {edu.field && `in ${edu.field}`}
+										</div>
+										<div className="text-gray-400">{edu.institution}</div>
+										{(edu.startDate || edu.endDate) && (
+											<div className="text-gray-500 text-xs">
+												{edu.startDate} - {edu.endDate || "Present"}
+											</div>
+										)}
+									</div>
+								))}
+							</div>
+						</div>
+					)}
+
+					{mutation.data.experience && mutation.data.experience.length > 0 && (
+						<div>
+							<div className="font-semibold mb-2">Experience</div>
+							<div className="space-y-3">
+								{(mutation.data.experience as Experience[]).map((exp, idx) => (
+									<div key={`exp-${idx}`} className="text-sm">
+										<div className="font-medium text-gray-200">
+											{exp.title || "Position"}
+										</div>
+										<div className="text-gray-400">{exp.company}</div>
+										{(exp.startDate || exp.endDate) && (
+											<div className="text-gray-500 text-xs">
+												{exp.startDate} - {exp.endDate || "Present"}
+											</div>
+										)}
+										{exp.summary && (
+											<div className="text-gray-400 text-xs mt-1">
+												{exp.summary}
+											</div>
+										)}
+									</div>
+								))}
+							</div>
+						</div>
+					)}
+
+					{mutation.data.projects && mutation.data.projects.length > 0 && (
+						<div>
+							<div className="font-semibold mb-2">Projects</div>
+							<div className="space-y-2">
+								{(mutation.data.projects as Project[]).map((proj, idx) => (
+									<div key={`proj-${idx}`} className="text-sm">
+										<div className="font-medium text-gray-200">{proj.name}</div>
+										{proj.description && (
+											<div className="text-gray-400 text-xs mt-1">
+												{proj.description}
+											</div>
+										)}
+										{proj.technologies && proj.technologies.length > 0 && (
+											<div className="flex flex-wrap gap-1 mt-1">
+												{proj.technologies.map((tech: string) => (
+													<span
+														key={tech}
+														className="text-xs bg-gray-700 px-2 py-0.5 rounded"
+													>
+														{tech}
+													</span>
+												))}
+											</div>
+										)}
+									</div>
+								))}
+							</div>
+						</div>
+					)}
+
+					{mutation.data.skills && mutation.data.skills.length > 0 && (
+						<div>
+							<div className="font-semibold mb-2">Skills</div>
+							<div className="flex flex-wrap gap-2">
+								{(mutation.data.skills as Skill[]).map((skill, idx) => (
+									<span
+										key={`skill-${idx}`}
+										className="text-sm bg-gray-700 px-3 py-1 rounded-full"
+									>
+										{skill.name}
+										{skill.level && (
+											<span className="text-xs text-gray-400 ml-1">
+												({skill.level})
+											</span>
+										)}
+									</span>
+								))}
+							</div>
+						</div>
+					)}
+
+					{mutation.data.questions && mutation.data.questions.length > 0 && (
+						<div>
+							<div className="font-semibold mb-2">Interview Questions</div>
+							<ol className="list-decimal ml-6 space-y-2">
+								{(mutation.data.questions as InterviewQuestion[]).map((q) => (
+									<li key={q.text} className="text-sm">
+										<div>{q.text}</div>
+										{q.correctAnswer && (
+											<div className="text-xs text-gray-400 mt-1">
+												Suggested answer: {q.correctAnswer}
+											</div>
+										)}
+										{(q.topic || q.confidence !== undefined) && (
+											<div className="text-xs text-gray-500 mt-0.5">
+												{q.topic && `Topic: ${q.topic}`}
+												{q.topic && q.confidence !== undefined && " • "}
+												{q.confidence !== undefined &&
+													`Confidence: ${Math.round(q.confidence * 100)}%`}
+											</div>
+										)}
 									</li>
 								))}
 							</ol>
