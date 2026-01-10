@@ -104,15 +104,13 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-	const { user } = Route.useRouteContext();
-
 	return (
 		<html lang="en">
 			<head>
 				<HeadContent />
 			</head>
 			<body className="dark">
-				<Header email={user?.email} />
+				<Header />
 
 				{children}
 
