@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader } from "~/components/ui/card";
+import { Card, CardHeader } from "~/components/ui/card";
 import Container from "~/components/ui/container";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
@@ -19,7 +19,6 @@ export const Route = createFileRoute("/_authed/organization/$orgId/")({
 
 function OrgPage() {
 	const router = useRouter();
-
 	const { trpc } = useGlobalContext();
 
 	const orgId = useMatch({
@@ -30,7 +29,7 @@ function OrgPage() {
 	const q = useQuery(trpc.getOrganization.queryOptions({ orgId }));
 
 	const org = q.data?.org;
-	const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
+	const members = org?.members ?? [];
 	const [jobTitle, setJobTitle] = useState("");
 	const [jobDesc, setJobDesc] = useState("");
 	const [adminEmail, setAdminEmail] = useState("");
@@ -72,9 +71,7 @@ function OrgPage() {
 			) : (
 				<div>
 					<h2 className="text-xl font-bold mb-2">{org?.name}</h2>
-					<div className="text-sm text-gray-500">
-						Members: {org?.members.length}
-					</div>
+					<div className="text-sm text-gray-500">Members: {members.length}</div>
 
 					<div className="mt-3 flex gap-3">
 						<Button
@@ -108,72 +105,57 @@ function OrgPage() {
 						<div className="font-semibold">Jobs</div>
 						{org?.jobs.length ? (
 							<ul className="mt-2 space-y-3">
-								{org?.jobs.map((j) => {
-									const expanded = expandedJobId === j.id;
-									return (
-										<li key={j.id}>
-											<Card>
-												<CardHeader>
-													<div className="flex items-center justify-between w-full">
-														<div className="text-lg font-medium">
-															{j.title ?? "Untitled"}
-														</div>
-														<div className="flex items-center gap-2">
-															<Button
-																size="sm"
-																variant="ghost"
-																onClick={() =>
-																	setExpandedJobId(expanded ? null : j.id)
-																}
-															>
-																{expanded ? "Collapse" : "Details"}
-															</Button>
-															<Link
-																to="/organization/$orgId/job/$jobId/candidates"
-																params={{ orgId, jobId: j.id }}
-															>
-																<Button size="sm" variant="outline">
-																	View Candidates
-																</Button>
-															</Link>
-															<Button
-																size="sm"
-																variant="destructive"
-																onClick={async () => {
-																	if (
-																		!confirm(
-																			"Delete job? This cannot be undone.",
-																		)
-																	)
-																		return;
-																	deleteJobMutation.mutate(
-																		{ jobId: j.id },
-																		{ onSuccess: () => refresh() },
-																	);
-																}}
-															>
-																Delete
-															</Button>
-														</div>
+								{org.jobs.map((j) => (
+									<li key={j.id}>
+										<Card>
+											<CardHeader>
+												<div className="flex items-center justify-between w-full">
+													<div className="text-lg font-medium">
+														{j.title ?? "Untitled"}
 													</div>
-												</CardHeader>
-
-												<CardContent>
-													<div className="text-sm text-muted-foreground mt-1">
-														{j.resumes.length} applicant
-														{j.resumes.length === 1 ? "" : "s"}
-													</div>
-
-													{expanded && (
-														<div className="text-sm text-muted-foreground my-2 whitespace-pre-wrap">
-															{j.description}
+													<div className="flex items-center gap-2">
+														<div className="text-sm text-muted-foreground">
+															{j.resumes.length} applicant
+															{j.resumes.length === 1 ? "" : "s"}
 														</div>
-													)}
-												</CardContent>
-											</Card>
-										</li>
-									);
-								})}
+														<Link
+															to="/organization/$orgId/job/$jobId/candidates"
+															params={{ orgId, jobId: j.id }}
+														>
+															<Button size="sm" variant="outline">
+																View Candidates
+															</Button>
+														</Link>
+														<Link
+															to="/organization/$orgId/job/$jobId"
+															params={{ orgId, jobId: j.id }}
+														>
+															<Button size="sm" variant="outline">
+																Edit
+															</Button>
+														</Link>
+														<Button
+															size="sm"
+															variant="destructive"
+															onClick={async () => {
+																if (
+																	!confirm("Delete job? This cannot be undone.")
+																)
+																	return;
+																deleteJobMutation.mutate(
+																	{ jobId: j.id },
+																	{ onSuccess: () => refresh() },
+																);
+															}}
+														>
+															Delete
+														</Button>
+													</div>
+												</div>
+											</CardHeader>
+										</Card>
+									</li>
+								))}
 							</ul>
 						) : (
 							<div className="text-muted-foreground mt-2">No jobs yet</div>
@@ -216,6 +198,29 @@ function OrgPage() {
 								</Button>
 							</div>
 						</div>
+					</div>
+
+					<div className="mt-6">
+						<div className="font-semibold">Members</div>
+						{members.length ? (
+							<ul className="mt-1 space-y-1 text-sm text-muted-foreground">
+								{members.map((member) => (
+									<li
+										key={member.user.id}
+										className="flex items-center justify-between"
+									>
+										<span>{member.user.email}</span>
+										<span className="rounded-full bg-gray-800 px-2 py-0.5 text-xs">
+											{member.isAdmin ? "Admin" : "Member"}
+										</span>
+									</li>
+								))}
+							</ul>
+						) : (
+							<div className="text-muted-foreground text-sm">
+								No members yet
+							</div>
+						)}
 					</div>
 
 					<div className="mt-6">
