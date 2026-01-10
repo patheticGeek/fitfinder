@@ -105,7 +105,6 @@ export const applyResume = authedProcedure
 				resumeRecord = await prismaClient.resume.create({
 					data: {
 						fileName,
-						path: `/uploaded/${id}/resume.pdf`,
 						score: geminiOut.score,
 						scoreJustification: geminiOut.scoreJustification,
 						questions: geminiOut.questions,
