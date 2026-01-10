@@ -5,44 +5,13 @@ import {
 	useMatch,
 	useRouter,
 } from "@tanstack/react-router";
-import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import Container from "~/components/ui/container";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
-import { prismaClient } from "~/utils/prisma";
-import { getAppSession } from "~/utils/session";
-import {
-	addAdminFn,
-	createJobFn,
-	deleteJobFn,
-	deleteOrgFn,
-} from "../../organizations";
-
-const GetOrganizationSchema = z.object({ orgId: z.string() });
-
-export const getOrganizationFn = createServerFn({ method: "GET" })
-	.inputValidator(GetOrganizationSchema.parse)
-	.handler(async ({ data }) => {
-		const session = await getAppSession();
-		const userEmail = session.data?.userEmail;
-		if (!userEmail) return { error: true, message: "Not authenticated" };
-
-		const org = await prismaClient.organization.findUnique({
-			where: { id: data.orgId },
-			include: {
-				members: { include: { user: true } },
-				jobs: { include: { resumes: { include: { user: true } } } },
-				resumes: true,
-			},
-		});
-
-		if (!org) return { error: true, message: "Organization not found" };
-		return { org };
-	});
+import { useGlobalContext } from "~/utils/hooks";
 
 export const Route = createFileRoute("/_authed/organization/$orgId/")({
 	component: OrgPage,
@@ -51,19 +20,14 @@ export const Route = createFileRoute("/_authed/organization/$orgId/")({
 function OrgPage() {
 	const router = useRouter();
 
+	const { trpc } = useGlobalContext();
+
 	const orgId = useMatch({
 		from: "/_authed/organization/$orgId/",
 		select: (s) => s.params.orgId,
 	});
 
-	const server = useServerFn(getOrganizationFn);
-	const q = useQuery({
-		queryKey: ["organization", orgId],
-		queryFn: async () => {
-			const res = await server({ data: { orgId } });
-			return res;
-		},
-	});
+	const q = useQuery(trpc.getOrganization.queryOptions({ orgId }));
 
 	const org = q.data?.org;
 	const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
@@ -72,16 +36,10 @@ function OrgPage() {
 	const [adminEmail, setAdminEmail] = useState("");
 	const [confirmDelete, setConfirmDelete] = useState(false);
 
-	const createJobMutation = useMutation({
-		mutationFn: useServerFn(createJobFn),
-	});
-	const addAdminMutation = useMutation({ mutationFn: useServerFn(addAdminFn) });
-	const deleteJobMutation = useMutation({
-		mutationFn: useServerFn(deleteJobFn),
-	});
-	const deleteOrgMutation = useMutation({
-		mutationFn: useServerFn(deleteOrgFn),
-	});
+	const createJobMutation = useMutation(trpc.createJob.mutationOptions());
+	const addAdminMutation = useMutation(trpc.addAdmin.mutationOptions());
+	const deleteJobMutation = useMutation(trpc.deleteJob.mutationOptions());
+	const deleteOrgMutation = useMutation(trpc.deleteOrg.mutationOptions());
 	const queryClient = useQueryClient();
 
 	function refresh() {
@@ -130,7 +88,7 @@ function OrgPage() {
 								}
 
 								deleteOrgMutation.mutate(
-									{ data: { orgId } },
+									{ orgId },
 									{
 										onSuccess: () => {
 											queryClient.invalidateQueries({
@@ -189,7 +147,7 @@ function OrgPage() {
 																	)
 																		return;
 																	deleteJobMutation.mutate(
-																		{ data: { jobId: j.id } },
+																		{ jobId: j.id },
 																		{ onSuccess: () => refresh() },
 																	);
 																}}
@@ -243,9 +201,7 @@ function OrgPage() {
 										if (!jobTitle) return alert("Enter job title");
 										if (!jobDesc) return alert("Enter job description");
 										createJobMutation.mutate(
-											{
-												data: { orgId, title: jobTitle, description: jobDesc },
-											},
+											{ orgId, title: jobTitle, description: jobDesc },
 											{
 												onSuccess: () => {
 													setJobTitle("");
@@ -269,7 +225,7 @@ function OrgPage() {
 								e.preventDefault();
 								if (!adminEmail) return alert("Enter an email");
 								addAdminMutation.mutate(
-									{ data: { orgId, userEmail: adminEmail } },
+									{ orgId, userEmail: adminEmail },
 									{
 										onSuccess: () => {
 											setAdminEmail("");

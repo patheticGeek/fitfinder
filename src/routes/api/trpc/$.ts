@@ -1,30 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { resolveResponse } from "@trpc/server/http";
-import { authedProcedure, createTRPContext, t } from "~/utils/trpcServer";
-
-const POSTS = [
-	{ id: "1", title: "First post" },
-	{ id: "2", title: "Second post" },
-	{ id: "3", title: "Third post" },
-	{ id: "4", title: "Fourth post" },
-	{ id: "5", title: "Fifth post" },
-	{ id: "6", title: "Sixth post" },
-	{ id: "7", title: "Seventh post" },
-	{ id: "8", title: "Eighth post" },
-	{ id: "9", title: "Ninth post" },
-	{ id: "10", title: "Tenth post" },
-];
+import { applyResume } from "~/api/mutations/applyResume";
+import { createJob, deleteJob } from "~/api/mutations/jobs";
+import {
+	addAdmin,
+	createOrganization,
+	deleteOrg,
+} from "~/api/mutations/organizations";
+import { getJobCandidates, listJobs } from "~/api/queries/jobs";
+import {
+	getOrganization,
+	listOrganizations,
+} from "~/api/queries/organizations";
+import { createTRPContext, t } from "~/utils/trpcServer";
 
 export const appRouter = t.router({
-	hello: t.procedure.query(() => "Hello world!"),
-	posts: authedProcedure.query(async (_) => {
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-		return POSTS;
-	}),
-	post: authedProcedure.input(String).query(async (req) => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-		return POSTS.find((p) => p.id === req.input);
-	}),
+	applyResume,
+	listJobs,
+	createOrganization,
+	listOrganizations,
+	addAdmin,
+	createJob,
+	getJobCandidates,
+	getOrganization,
+	deleteJob,
+	deleteOrg,
 });
 
 export type AppRouter = typeof appRouter;

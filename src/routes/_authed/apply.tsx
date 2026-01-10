@@ -1,6 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
@@ -15,7 +14,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "~/components/ui/select";
-import { applyResumeFn, listJobsFn } from "./apply.fn";
+import { useGlobalContext } from "~/utils/hooks";
 
 type JobWithOrg = {
 	id: string;
@@ -34,17 +33,11 @@ function ApplyPage() {
 	const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 	const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
 
-	const mutation = useMutation({
-		mutationFn: useServerFn(applyResumeFn),
-	});
-	const listJobsServer = useServerFn(listJobsFn);
-	const jobsQuery = useQuery({
-		queryKey: ["jobs"],
-		queryFn: async () => {
-			const res = await listJobsServer();
-			return res;
-		},
-	});
+	const { trpc } = useGlobalContext();
+
+	const mutation = useMutation(trpc.applyResume.mutationOptions());
+
+	const jobsQuery = useQuery(trpc.listJobs.queryOptions());
 
 	const { jobsByOrg, jobsById } = useMemo(() => {
 		const jobs = jobsQuery.data?.jobs ?? [];
@@ -69,23 +62,14 @@ function ApplyPage() {
 		try {
 			const base64 = (await readFileAsBase64(file)) as string;
 			const contentBase64 = base64.replace(/^data:.*;base64,/, "");
-			mutation.mutate(
-				{
-					data: {
-						fileName: file.name,
-						mimeType: file.type,
-						contentBase64,
-						jobDescription,
-						jobId: selectedJobId,
-						orgId: selectedOrgId ?? undefined,
-					},
-				},
-				{
-					onError(err) {
-						console.log(err);
-					},
-				},
-			);
+			mutation.mutate({
+				fileName: file.name,
+				mimeType: file.type,
+				contentBase64,
+				jobDescription,
+				jobId: selectedJobId,
+				orgId: selectedOrgId ?? undefined,
+			});
 		} catch (err) {
 			const msg = err instanceof Error ? err.message : String(err);
 			alert(`Failed to read file: ${msg}`);

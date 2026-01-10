@@ -1,20 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import Container from "~/components/ui/container";
-import { useTRPC } from "~/utils/trpc";
 
 export const Route = createFileRoute("/")({
 	component: Home,
 });
 
 function Home() {
-	const trpc = useTRPC();
-	const postsQuery = useQuery(trpc.posts.queryOptions());
-
-	console.log("postsQuery", postsQuery.data);
-
 	return (
 		<Container size="lg">
 			<header className="py-12 text-center">
