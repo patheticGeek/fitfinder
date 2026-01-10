@@ -10,6 +10,8 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { createServerFn } from "@tanstack/react-start";
+import type { createTRPCClient } from "@trpc/client";
+import type { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import type * as React from "react";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary.js";
 import Header from "~/components/global/Header";
@@ -18,6 +20,7 @@ import appCss from "~/styles/app.css?url";
 import { prismaClient } from "~/utils/prisma";
 import { seo } from "~/utils/seo.js";
 import { getAppSession } from "~/utils/session.js";
+import type { AppRouter } from "./api/trpc/$";
 
 const fetchUser = createServerFn({ method: "GET" }).handler(async () => {
 	// We need to auth on the server so we have access to secure cookies
@@ -35,6 +38,8 @@ const fetchUser = createServerFn({ method: "GET" }).handler(async () => {
 
 export const Route = createRootRouteWithContext<{
 	queryClient: QueryClient;
+	trpcClient: ReturnType<typeof createTRPCClient<AppRouter>>;
+	trpc: ReturnType<typeof createTRPCOptionsProxy<AppRouter>>;
 }>()({
 	beforeLoad: async () => {
 		const user = await fetchUser();
