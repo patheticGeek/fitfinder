@@ -8,6 +8,11 @@ const GetJobCandidatesSchema = z.object({
 	jobId: z.string(),
 });
 
+const GetJobSchema = z.object({
+	orgId: z.string(),
+	jobId: z.string(),
+});
+
 export const listJobs = authedProcedure.query(async () => {
 	const jobs = await prismaClient.job.findMany({
 		include: { organization: true },
@@ -37,6 +42,40 @@ export const getJobCandidates = authedProcedure
 				code: "FORBIDDEN",
 				message: "Job does not belong to organization",
 			});
+		}
+
+		return { job };
+	});
+
+export const getJob = authedProcedure
+	.input(GetJobSchema)
+	.query(async ({ ctx, input }) => {
+		const job = await prismaClient.job.findUnique({
+			where: { id: input.jobId },
+		});
+
+		if (!job) {
+			throw new TRPCError({ code: "NOT_FOUND", message: "Job not found" });
+		}
+
+		if (job.organizationId !== input.orgId) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: "Job does not belong to organization",
+			});
+		}
+
+		const membership = await prismaClient.organizationUser.findUnique({
+			where: {
+				userId_organizationId: {
+					userId: ctx.user.id,
+					organizationId: job.organizationId,
+				},
+			},
+		});
+
+		if (!membership || !membership.isAdmin) {
+			throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
 		}
 
 		return { job };

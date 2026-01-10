@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { resolveResponse } from "@trpc/server/http";
 import { applyResume } from "~/api/mutations/applyResume";
-import { createJob, deleteJob } from "~/api/mutations/jobs";
+import { createJob, deleteJob, updateJob } from "~/api/mutations/jobs";
 import {
 	addAdmin,
 	createOrganization,
 	deleteOrg,
 } from "~/api/mutations/organizations";
-import { getJobCandidates, listJobs } from "~/api/queries/jobs";
+import { getJob, getJobCandidates, listJobs } from "~/api/queries/jobs";
 import {
 	getOrganization,
 	listOrganizations,
@@ -21,7 +21,9 @@ export const appRouter = t.router({
 	listOrganizations,
 	addAdmin,
 	createJob,
+	updateJob,
 	getJobCandidates,
+	getJob,
 	getOrganization,
 	deleteJob,
 	deleteOrg,
