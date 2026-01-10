@@ -39,27 +39,71 @@ model OrganizationUser {
 }
 
 model Job {
-  id             String       @id @default(uuid())
-  title          String?
-  description    String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  organizationId String
-  resumes        Resume[]
-  createdAt      DateTime     @default(now())
+  id                     String       @id @default(uuid())
+  title                  String?
+  description            String
+  organization           Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId         String
+  resumes                Resume[]
+  additionalInstructions String?
+  suggestedQuestions     String?
+  createdAt              DateTime     @default(now())
 }
 
 model Resume {
-  id                  String        @id @default(uuid())
-  user                User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId              String?
-  job                 Job?          @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  jobId               String?
-  organization        Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  organizationId      String?
-  fileName            String
-  path                String
-  score               Int?
-  scoreJustification  String?
-  questions           Json?
-  createdAt           DateTime      @default(now())
+  id                 String        @id @default(uuid())
+  user               User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId             String?
+  job                Job?          @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId              String?
+  organization       Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId     String?
+  fileName           String
+  path               String
+  score              Int?
+  scoreJustification String?
+  // Structured, AI-extracted sections
+  education          Json? // Array of education entries
+  experience         Json? // Array of experience entries with start/end dates
+  projects           Json? // Array of projects
+  skills             Json? // Array<{ name: string; level: 'beginner'|'intermediate'|'expert' }>
+
+  // Candidate Q&A
+  interviewQuestions Json? // Optional: list of generated questions
+  questionAnswers    QuestionAnswer[]
+
+  // Profile enrichments
+  currentLocation       String?
+  totalExperienceMonths Int? // Total experience in months for precision
+
+  // Normalized skills linkage
+  resumeSkills ResumeSkill[]
+  createdAt    DateTime      @default(now())
+}
+
+model QuestionAnswer {
+  id        String   @id @default(uuid())
+  resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  resumeId  String
+  question  String
+  answer    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Skill {
+  id        String        @id @default(uuid())
+  name      String        @unique
+  createdAt DateTime      @default(now())
+  resumes   ResumeSkill[]
+}
+
+model ResumeSkill {
+  id       String @id @default(uuid())
+  resume   Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  resumeId String
+  skill    Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  skillId  String
+
+  @@unique([resumeId, skillId])
 }
