@@ -18,12 +18,12 @@ export type TRPCContext = Awaited<ReturnType<typeof createTRPContext>>;
 export const t = initTRPC.context<TRPCContext>().create();
 
 const authenticated = t.middleware(async ({ ctx, next }) => {
-	if (!ctx.session.data.userEmail) {
+	if (!ctx.session.data.userId) {
 		throw new TRPCError({ code: "UNAUTHORIZED" });
 	}
 
 	const user = await prismaClient.user.findUnique({
-		where: { email: ctx.session.data.userEmail },
+		where: { id: ctx.session.data.userId },
 		omit: { password: true },
 	});
 

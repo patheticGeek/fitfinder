@@ -1,9 +1,8 @@
-// src/services/session.server.ts
 import { useSession } from "@tanstack/react-start/server";
 import type { User } from "~/prisma-generated/client";
 
 type SessionUser = {
-	userEmail: User["email"];
+	userId: User["id"];
 };
 
 export function getAppSession() {

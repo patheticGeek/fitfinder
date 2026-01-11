@@ -26,12 +26,12 @@ const fetchUser = createServerFn({ method: "GET" }).handler(async () => {
 	// We need to auth on the server so we have access to secure cookies
 	const session = await getAppSession();
 
-	if (!session.data.userEmail) {
+	if (!session.data.userId) {
 		return null;
 	}
 
 	return await prismaClient.user.findUnique({
-		where: { email: session.data.userEmail },
+		where: { id: session.data.userId },
 		omit: { password: true },
 	});
 });
@@ -109,15 +109,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			<head>
 				<HeadContent />
 			</head>
-			<body className="dark">
+			<body>
 				<Header />
-
 				{children}
-
-				<TanStackRouterDevtools position="bottom-right" />
-				<ReactQueryDevtools buttonPosition="bottom-left" />
-
 				<Scripts />
+				<ReactQueryDevtools buttonPosition="bottom-right" />
+				<TanStackRouterDevtools position="bottom-right" />
 			</body>
 		</html>
 	);

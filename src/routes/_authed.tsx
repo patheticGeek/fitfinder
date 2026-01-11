@@ -1,50 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-import { Login } from "~/components/Login";
-import { hashPassword, prismaClient } from "~/utils/prisma";
-import { getAppSession } from "~/utils/session";
-
-export const loginFn = createServerFn({ method: "POST" })
-	.inputValidator(
-		z.object({ email: z.string().email(), password: z.string().min(1) }).parse,
-	)
-	.handler(async ({ data }) => {
-		// Find the user
-		const user = await prismaClient.user.findUnique({
-			where: {
-				email: data.email,
-			},
-		});
-
-		// Check if the user exists
-		if (!user) {
-			return {
-				error: true,
-				userNotFound: true,
-				message: "User not found",
-			};
-		}
-
-		// Check if the password is correct
-		const hashedPassword = await hashPassword(data.password);
-
-		if (user.password !== hashedPassword) {
-			return {
-				error: true,
-				message: "Incorrect password",
-			};
-		}
-
-		// Create a session
-		const session = await getAppSession();
-
-		// Store the user's email in the session
-		await session.update({
-			userEmail: user.email,
-		});
-	});
-
+import { createFileRoute, redirect } from "@tanstack/react-router";
 export const Route = createFileRoute("/_authed")({
 	beforeLoad: ({ context }) => {
 		if (!context.user) {
@@ -53,7 +7,8 @@ export const Route = createFileRoute("/_authed")({
 	},
 	errorComponent: ({ error }) => {
 		if (error.message === "Not authenticated") {
-			return <Login />;
+			redirect({ href: "/login" });
+			return null;
 		}
 
 		throw error;
