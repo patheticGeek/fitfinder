@@ -18,10 +18,6 @@ function AppDashboard() {
 
 	const createMutation = useMutation(trpc.createOrganization.mutationOptions());
 
-	function refresh() {
-		listQuery.refetch();
-	}
-
 	return (
 		<div className="p-6">
 			<div className="max-w-4xl">
@@ -40,7 +36,7 @@ function AppDashboard() {
 									{
 										onSuccess: () => {
 											setName("");
-											refresh();
+											listQuery.refetch();
 										},
 									},
 								);

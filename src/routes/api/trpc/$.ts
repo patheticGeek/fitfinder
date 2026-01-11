@@ -45,7 +45,9 @@ export const Route = createFileRoute("/api/trpc/$")({
 					createContext: (trpcCtx) => createTRPContext({ ...trpcCtx }),
 					router: appRouter,
 					error: null,
-					onError: () => {}, // we ballin
+					onError: ({ error }) => {
+						console.error("TRPC Error:", error);
+					},
 					path: pathname.replace("/api/trpc/", ""),
 				}),
 		},

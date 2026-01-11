@@ -14,7 +14,6 @@ import type { createTRPCClient } from "@trpc/client";
 import type { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import type * as React from "react";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary.js";
-import Header from "~/components/global/Header";
 import { NotFound } from "~/components/NotFound.js";
 import appCss from "~/styles/app.css?url";
 import { prismaClient } from "~/utils/prisma";
@@ -43,10 +42,7 @@ export const Route = createRootRouteWithContext<{
 }>()({
 	beforeLoad: async () => {
 		const user = await fetchUser();
-
-		return {
-			user,
-		};
+		return { user };
 	},
 	head: () => ({
 		meta: [
@@ -109,12 +105,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			<head>
 				<HeadContent />
 			</head>
-			<body>
-				<Header />
+			<body className="dark">
 				{children}
-				<Scripts />
 				<ReactQueryDevtools buttonPosition="bottom-right" />
 				<TanStackRouterDevtools position="bottom-right" />
+				<Scripts />
 			</body>
 		</html>
 	);

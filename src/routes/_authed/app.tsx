@@ -19,6 +19,7 @@ import {
 	SidebarMenuItem,
 	SidebarProvider,
 } from "~/components/ui/sidebar";
+import { Spinner } from "~/components/ui/spinner";
 import { useGlobalContext } from "~/utils/hooks";
 
 export const Route = createFileRoute("/_authed/app")({
@@ -39,7 +40,8 @@ function AppLayout() {
 					<SidebarContent>
 						<SidebarGroup>
 							<SidebarGroupLabel className="text-xl font-semibold">
-								FitFinder
+								FitFinder{" "}
+								{routerState.isLoading ? <Spinner className="ml-2" /> : null}
 							</SidebarGroupLabel>
 
 							<SidebarGroupContent className="mt-3">
