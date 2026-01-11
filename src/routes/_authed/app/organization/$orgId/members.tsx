@@ -6,7 +6,9 @@ import { Card, CardHeader } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { useGlobalContext } from "~/utils/hooks";
 
-export const Route = createFileRoute("/_authed/organization/$orgId/members")({
+export const Route = createFileRoute(
+	"/_authed/app/organization/$orgId/members",
+)({
 	component: MembersPage,
 });
 
@@ -14,7 +16,7 @@ function MembersPage() {
 	const { trpc, user } = useGlobalContext();
 
 	const orgId = useMatch({
-		from: "/_authed/organization/$orgId/members",
+		from: "/_authed/app/organization/$orgId/members",
 		select: (s) => s.params.orgId,
 	});
 
@@ -22,8 +24,7 @@ function MembersPage() {
 
 	const org = q.data?.org;
 	const members = org?.members ?? [];
-	
-	// Check if current user is admin
+
 	const currentUserMembership = members.find((m) => m.user.id === user?.id);
 	const isAdmin = currentUserMembership?.isAdmin ?? false;
 
@@ -52,13 +53,13 @@ function MembersPage() {
 				<Card className="mb-6 border-yellow-900/50 bg-yellow-900/10">
 					<CardHeader>
 						<p className="text-sm text-yellow-300">
-							You don't have permission to add members. Only admins can manage team members.
+							You don't have permission to add members. Only admins can manage
+							team members.
 						</p>
 					</CardHeader>
 				</Card>
 			)}
 
-			{/* Add Member Form */}
 			<Card className="mb-6">
 				<CardHeader>
 					<div className="font-semibold text-lg mb-4">Add Team Member</div>
@@ -107,7 +108,6 @@ function MembersPage() {
 				</CardHeader>
 			</Card>
 
-			{/* Add Admin Form */}
 			<Card className="mb-6">
 				<CardHeader>
 					<div className="font-semibold text-lg mb-4">Promote to Admin</div>
@@ -156,7 +156,6 @@ function MembersPage() {
 				</CardHeader>
 			</Card>
 
-			{/* Members List */}
 			<div>
 				<h2 className="text-xl font-semibold mb-4">All Members</h2>
 				{q.isLoading ? (

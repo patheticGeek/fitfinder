@@ -7,7 +7,7 @@ import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { useGlobalContext } from "~/utils/hooks";
 
-export const Route = createFileRoute("/_authed/organization/$orgId/jobs")({
+export const Route = createFileRoute("/_authed/app/organization/$orgId/jobs")({
 	component: JobsPage,
 });
 
@@ -15,7 +15,7 @@ function JobsPage() {
 	const { trpc } = useGlobalContext();
 
 	const orgId = useMatch({
-		from: "/_authed/organization/$orgId/jobs",
+		from: "/_authed/app/organization/$orgId/jobs",
 		select: (s) => s.params.orgId,
 	});
 
@@ -141,7 +141,7 @@ function JobsPage() {
 										</div>
 										<div className="flex items-center gap-2 shrink-0">
 											<Link
-												to="/organization/$orgId/job/$jobId/candidates"
+												to="/app/organization/$orgId/job/$jobId/candidates"
 												params={{ orgId, jobId: j.id }}
 											>
 												<Button size="sm" variant="outline">
@@ -149,7 +149,7 @@ function JobsPage() {
 												</Button>
 											</Link>
 											<Link
-												to="/organization/$orgId/job/$jobId"
+												to="/app/organization/$orgId/job/$jobId"
 												params={{ orgId, jobId: j.id }}
 											>
 												<Button size="sm" variant="outline">

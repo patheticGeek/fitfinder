@@ -8,14 +8,14 @@ import { Textarea } from "~/components/ui/textarea";
 import { useGlobalContext } from "~/utils/hooks";
 
 export const Route = createFileRoute(
-	"/_authed/organization/$orgId/job/$jobId/",
+	"/_authed/app/organization/$orgId/job/$jobId/",
 )({
 	component: JobEditPage,
 });
 
 function JobEditPage() {
 	const { orgId, jobId } = useMatch({
-		from: "/_authed/organization/$orgId/job/$jobId/",
+		from: "/_authed/app/organization/$orgId/job/$jobId/",
 		select: (s) => s.params,
 	});
 
@@ -67,13 +67,13 @@ function JobEditPage() {
 			<div className="flex items-center justify-between">
 				<h2 className="text-xl font-bold">Edit Job</h2>
 				<div className="flex gap-2">
-					<Link to="/organization/$orgId" params={{ orgId }}>
+					<Link to="/app/organization/$orgId" params={{ orgId }}>
 						<Button variant="outline" size="sm">
 							Back to Org
 						</Button>
 					</Link>
 					<Link
-						to="/organization/$orgId/job/$jobId/candidates"
+						to="/app/organization/$orgId/job/$jobId/candidates"
 						params={{ orgId, jobId }}
 					>
 						<Button size="sm" variant="secondary">

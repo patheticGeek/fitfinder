@@ -14,14 +14,14 @@ import Container from "~/components/ui/container";
 import { useGlobalContext } from "~/utils/hooks";
 
 export const Route = createFileRoute(
-	"/_authed/organization/$orgId/job/$jobId/candidates",
+	"/_authed/app/organization/$orgId/job/$jobId/candidates",
 )({
 	component: CandidatesPage,
 });
 
 function CandidatesPage() {
 	const { orgId, jobId } = useMatch({
-		from: "/_authed/organization/$orgId/job/$jobId/candidates",
+		from: "/_authed/app/organization/$orgId/job/$jobId/candidates",
 		select: (s) => s.params,
 	});
 
@@ -41,7 +41,7 @@ function CandidatesPage() {
 					Candidates for {job?.title ?? "Job"}
 				</h2>
 				<div>
-					<Link to="/organization/$orgId" params={{ orgId }}>
+					<Link to="/app/organization/$orgId" params={{ orgId }}>
 						<Button size="sm">Back to Org</Button>
 					</Link>
 				</div>

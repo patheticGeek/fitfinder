@@ -6,6 +6,11 @@ export default function Header() {
 	const { user } = useGlobalContext();
 	const router = useRouterState();
 
+	// Only show header on public pages (not /app)
+	if (user) {
+		return null;
+	}
+
 	return (
 		<header className="bg-background/50 border-b relative">
 			<nav className="max-w-6xl mx-auto p-4 flex items-center gap-6 text-lg">
@@ -23,41 +28,12 @@ export default function Header() {
 					>
 						Home
 					</Link>
-					<Link
-						to="/apply"
-						activeProps={{ className: "font-semibold" }}
-						activeOptions={{ exact: true }}
-					>
-						Apply
-					</Link>
-					{user && (
-						<Link
-							to="/organizations"
-							activeProps={{ className: "font-semibold" }}
-							activeOptions={{ exact: true }}
-						>
-							Organizations
-						</Link>
-					)}
 				</div>
 
 				<div className="ml-auto flex items-center gap-3">
-					{user ? (
-						<>
-							<span className="mr-2 truncate max-w-xs text-sm text-muted-foreground">
-								{user.email}
-							</span>
-							<Link to="/logout">
-								<Button variant="ghost" size="sm">
-									Logout
-								</Button>
-							</Link>
-						</>
-					) : (
-						<Link to="/login">
-							<Button size="sm">Login</Button>
-						</Link>
-					)}
+					<Link to="/login">
+						<Button size="sm">Login</Button>
+					</Link>
 				</div>
 			</nav>
 

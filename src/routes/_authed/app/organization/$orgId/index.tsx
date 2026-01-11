@@ -10,7 +10,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { useGlobalContext } from "~/utils/hooks";
 
-export const Route = createFileRoute("/_authed/organization/$orgId/")({
+export const Route = createFileRoute("/_authed/app/organization/$orgId/")({
 	component: OrgPage,
 });
 
@@ -19,7 +19,7 @@ function OrgPage() {
 	const { trpc } = useGlobalContext();
 
 	const orgId = useMatch({
-		from: "/_authed/organization/$orgId/",
+		from: "/_authed/app/organization/$orgId/",
 		select: (s) => s.params.orgId,
 	});
 
@@ -102,7 +102,7 @@ function OrgPage() {
 						<CardHeader>
 							<div className="flex items-center justify-between">
 								<div className="font-semibold text-lg">Recent Jobs</div>
-								<Link to="/organization/$orgId/jobs" params={{ orgId }}>
+								<Link to="/app/organization/$orgId/jobs" params={{ orgId }}>
 									<Button size="sm" variant="outline">
 										View All Jobs
 									</Button>
@@ -127,7 +127,7 @@ function OrgPage() {
 												</div>
 											</div>
 											<Link
-												to="/organization/$orgId/job/$jobId/candidates"
+												to="/app/organization/$orgId/job/$jobId/candidates"
 												params={{ orgId, jobId: job.id }}
 											>
 												<Button size="sm" variant="ghost">
@@ -141,7 +141,7 @@ function OrgPage() {
 								<div className="text-center py-8 text-muted-foreground">
 									No jobs yet.{" "}
 									<Link
-										to="/organization/$orgId/jobs"
+										to="/app/organization/$orgId/jobs"
 										params={{ orgId }}
 										className="underline"
 									>
@@ -180,7 +180,7 @@ function OrgPage() {
 												{ orgId },
 												{
 													onSuccess: () => {
-														router.navigate({ to: "/organizations" });
+														router.navigate({ to: "/app" });
 													},
 												},
 											);
