@@ -83,11 +83,11 @@ async function generateMatchAndQuestionsWithGemini(
 	const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 	const additionalContext = additionalInstructions
-		? `\n\n<additional-instructions>\n${additionalInstructions}\n</additional-instructions>`
+		? `<additional-instructions>\n${additionalInstructions}\n</additional-instructions>`
 		: "";
 
 	const suggestedQuestionsContext = suggestedQuestions
-		? `\n\n<suggested-questions>\n${suggestedQuestions}\n</suggested-questions>`
+		? `<suggested-questions>\n${suggestedQuestions}\n</suggested-questions>`
 		: "";
 
 	const prompt = `
@@ -95,19 +95,19 @@ async function generateMatchAndQuestionsWithGemini(
 	- score (0-100)
 	- scoreJustification (2-3 sentences)
 	- interviewQuestions (array of ~5 short questions with optional topic, confidence [0-1], and optional correctAnswer)
-	- education (array of entries: institution, optional degree, field, startDate, endDate, location)
-	- experience (array of entries: company, optional title, startDate, endDate, summary, location)
-	- projects (array of entries: name, optional description, technologies[])
+	- education (array of entries: institution, optional degree, field, startDate, endDate, location, do not change or paraphrase - use exact text from resume)
+	- experience (array of entries: company, optional title, startDate, endDate, summary, location,  do not change or paraphrase - use exact text from resume)
+	- projects (array of entries: name, optional description, technologies[], these are side projects, don't mention projects done in experience, do not change or paraphrase - use exact text from resume)
 	- skills (array of entries: name, optional level one of beginner|intermediate|expert)
-	- currentLocation (optional)
+	- currentLocation (optional, if no location mentioned explicitly - use the ast job's location)
 	- totalExperienceMonths (optional integer)
 	- email (optional, extracted candidate email address)
 	- phone (optional, extracted candidate phone number)
 
 	<resume>\n${resumeText}\n</resume>
 	<job-description>\n${jobDescription}\n</job-description>
-	<additional-context>${additionalContext}</additional-context>
-	<suggested-questions>${suggestedQuestionsContext}</suggested-questions>
+	${additionalContext}
+	${suggestedQuestionsContext}
 	`.trim();
 
 	try {

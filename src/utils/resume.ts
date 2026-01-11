@@ -107,3 +107,12 @@ export function computeTotalExperienceMonths(
 	const totalMonths = merged.reduce((sum, r) => sum + (r.end - r.start + 1), 0);
 	return Math.max(0, totalMonths);
 }
+
+export async function readFileAsBase64(file: File): Promise<string> {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.onload = () => resolve(reader.result as string);
+		reader.onerror = () => reject(new Error("Failed to read file"));
+		reader.readAsDataURL(file);
+	});
+}

@@ -22,6 +22,7 @@ import {
 	SelectValue,
 } from "~/components/ui/select";
 import { useGlobalContext } from "~/utils/hooks";
+import { readFileAsBase64 } from "~/utils/resume";
 
 type JobWithOrg = {
 	id: string;
@@ -356,13 +357,4 @@ function ApplyPage() {
 			) : null}
 		</Container>
 	);
-}
-
-function readFileAsBase64(file: File) {
-	return new Promise((resolve, reject) => {
-		const reader = new FileReader();
-		reader.onerror = () => reject(new Error("File read error"));
-		reader.onload = () => resolve(reader.result as string);
-		reader.readAsDataURL(file);
-	});
 }

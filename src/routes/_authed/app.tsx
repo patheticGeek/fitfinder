@@ -5,7 +5,13 @@ import {
 	useParams,
 	useRouterState,
 } from "@tanstack/react-router";
-import { Briefcase, LayoutDashboard, LogOut, Users } from "lucide-react";
+import {
+	Briefcase,
+	FileUp,
+	LayoutDashboard,
+	LogOut,
+	Users,
+} from "lucide-react";
 import { OrganizationSelector } from "~/components/OrganizationSelector";
 import { Button } from "~/components/ui/button";
 import {
@@ -93,6 +99,21 @@ function AppLayout() {
 												>
 													<Briefcase className="h-4 w-4" />
 													<span>Jobs</span>
+												</SidebarMenuButton>
+											</Link>
+										</SidebarMenuItem>
+
+										<SidebarMenuItem>
+											<Link
+												to="/app/organization/$orgId/ingest-resumes"
+												params={{ orgId: currentOrgId }}
+												activeProps={{ className: "font-semibold" }}
+											>
+												<SidebarMenuButton
+													isActive={currentPath.includes("/ingest-resumes")}
+												>
+													<FileUp className="h-4 w-4" />
+													<span>Ingest Resumes</span>
 												</SidebarMenuButton>
 											</Link>
 										</SidebarMenuItem>

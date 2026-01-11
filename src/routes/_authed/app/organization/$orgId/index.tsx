@@ -97,6 +97,19 @@ function OrgPage() {
 						</Card>
 					</div>
 
+					{/* Actions */}
+					<div className="mb-6 flex gap-3">
+						<Link
+							to="/app/organization/$orgId/ingest-resumes"
+							params={{ orgId }}
+						>
+							<Button>Ingest Resumes</Button>
+						</Link>
+						<Link to="/app/organization/$orgId/jobs" params={{ orgId }}>
+							<Button variant="outline">Manage Jobs</Button>
+						</Link>
+					</div>
+
 					{/* Recent Jobs */}
 					<Card className="mb-6">
 						<CardHeader>
