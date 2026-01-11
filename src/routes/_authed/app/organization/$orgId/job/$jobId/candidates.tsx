@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, useMatch } from "@tanstack/react-router";
+import { createFileRoute, useMatch } from "@tanstack/react-router";
 import { useState } from "react";
 import type {
 	Education,
@@ -40,11 +40,6 @@ function CandidatesPage() {
 				<h2 className="text-xl font-bold">
 					Candidates for {job?.title ?? "Job"}
 				</h2>
-				<div>
-					<Link to="/app/organization/$orgId" params={{ orgId }}>
-						<Button size="sm">Back to Org</Button>
-					</Link>
-				</div>
 			</div>
 
 			{q.isLoading ? (

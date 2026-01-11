@@ -28,8 +28,8 @@ function MembersPage() {
 	const currentUserMembership = members.find((m) => m.user.id === user?.id);
 	const isAdmin = currentUserMembership?.isAdmin ?? false;
 
-	const [memberEmail, setMemberEmail] = useState("");
-	const [adminEmail, setAdminEmail] = useState("");
+	const [email, setEmail] = useState("");
+	const [error, setError] = useState<string | null>(null);
 
 	const addMemberMutation = useMutation(trpc.addMember.mutationOptions());
 	const addAdminMutation = useMutation(trpc.addAdmin.mutationOptions());
@@ -37,6 +37,56 @@ function MembersPage() {
 	function refresh() {
 		q.refetch();
 	}
+
+	const handleAddMember = (e: React.FormEvent) => {
+		e.preventDefault();
+		setError(null);
+
+		if (!email.trim()) {
+			setError("Please enter an email address");
+			return;
+		}
+
+		addMemberMutation.mutate(
+			{ orgId, userEmail: email },
+			{
+				onSuccess: () => {
+					setEmail("");
+					setError(null);
+					refresh();
+				},
+				// biome-ignore lint/suspicious/noExplicitAny: TRPC error handling
+				onError: (err: any) => {
+					setError(err?.message || "Failed to add member. Please try again.");
+				},
+			},
+		);
+	};
+
+	const handleAddAdmin = (e: React.FormEvent) => {
+		e.preventDefault();
+		setError(null);
+
+		if (!email.trim()) {
+			setError("Please enter an email address");
+			return;
+		}
+
+		addAdminMutation.mutate(
+			{ orgId, userEmail: email },
+			{
+				onSuccess: () => {
+					setEmail("");
+					setError(null);
+					refresh();
+				},
+				// biome-ignore lint/suspicious/noExplicitAny: TRPC error handling
+				onError: (err: any) => {
+					setError(err?.message || "Failed to add admin. Please try again.");
+				},
+			},
+		);
+	};
 
 	return (
 		<div className="max-w-4xl">
@@ -62,95 +112,63 @@ function MembersPage() {
 
 			<Card className="mb-6">
 				<CardHeader>
-					<div className="font-semibold text-lg mb-4">Add Team Member</div>
+					<div className="font-semibold text-lg mb-4">
+						Add Team Member or Admin
+					</div>
 					{!isAdmin ? (
 						<p className="text-sm text-muted-foreground">
 							Only admins can add members to this organization.
 						</p>
 					) : (
-						<form
-							onSubmit={(e) => {
-								e.preventDefault();
-								if (!memberEmail.trim()) return alert("Enter an email");
-								addMemberMutation.mutate(
-									{ orgId, userEmail: memberEmail },
-									{
-										onSuccess: () => {
-											setMemberEmail("");
-											refresh();
-										},
-									},
-								);
-							}}
-							className="space-y-3"
-						>
+						<form className="space-y-4">
 							<div>
 								<label
-									htmlFor="member-email"
+									htmlFor="email"
 									className="text-sm font-medium mb-1 block"
 								>
 									Email Address
 								</label>
 								<Input
-									id="member-email"
+									id="email"
 									type="email"
-									value={memberEmail}
-									onChange={(e) => setMemberEmail(e.target.value)}
-									className="flex-1"
+									value={email}
+									onChange={(e) => {
+										setEmail(e.target.value);
+										setError(null);
+									}}
 									placeholder="user@example.com"
+									disabled={
+										addMemberMutation.isPending || addAdminMutation.isPending
+									}
 								/>
 							</div>
-							<Button type="submit" disabled={addMemberMutation.isPending}>
-								{addMemberMutation.isPending ? "Adding..." : "Add as Member"}
-							</Button>
-						</form>
-					)}
-				</CardHeader>
-			</Card>
 
-			<Card className="mb-6">
-				<CardHeader>
-					<div className="font-semibold text-lg mb-4">Promote to Admin</div>
-					{!isAdmin ? (
-						<p className="text-sm text-muted-foreground">
-							Only admins can promote members to admin role.
-						</p>
-					) : (
-						<form
-							onSubmit={(e) => {
-								e.preventDefault();
-								if (!adminEmail.trim()) return alert("Enter an email");
-								addAdminMutation.mutate(
-									{ orgId, userEmail: adminEmail },
-									{
-										onSuccess: () => {
-											setAdminEmail("");
-											refresh();
-										},
-									},
-								);
-							}}
-							className="space-y-3"
-						>
-							<div>
-								<label
-									htmlFor="admin-email"
-									className="text-sm font-medium mb-1 block"
+							{error && (
+								<div className="px-3 py-2 rounded bg-red-900/50 border border-red-800 text-sm text-red-300">
+									{error}
+								</div>
+							)}
+
+							<div className="flex gap-3">
+								<Button
+									onClick={handleAddMember}
+									disabled={
+										addMemberMutation.isPending || addAdminMutation.isPending
+									}
+									variant="default"
 								>
-									Email Address
-								</label>
-								<Input
-									id="admin-email"
-									type="email"
-									value={adminEmail}
-									onChange={(e) => setAdminEmail(e.target.value)}
-									className="flex-1"
-									placeholder="user@example.com"
-								/>
+									{addMemberMutation.isPending ? "Adding..." : "Add as Member"}
+								</Button>
+								<Button
+									onClick={handleAddAdmin}
+									disabled={
+										addMemberMutation.isPending || addAdminMutation.isPending
+									}
+									variant="outline"
+								>
+									{addAdminMutation.isPending ? "Adding..." : "Add as Admin"}
+								</Button>
 							</div>
-							<Button type="submit" disabled={addAdminMutation.isPending}>
-								{addAdminMutation.isPending ? "Adding..." : "Add as Admin"}
-							</Button>
 						</form>
 					)}
 				</CardHeader>

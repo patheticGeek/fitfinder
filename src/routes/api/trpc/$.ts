@@ -39,8 +39,8 @@ export type AppRouter = typeof appRouter;
 export const Route = createFileRoute("/api/trpc/$")({
 	server: {
 		handlers: {
-			ANY: async ({ request, pathname }) =>
-				resolveResponse({
+			ANY: async ({ request, pathname }) => {
+				const response = await resolveResponse({
 					req: request,
 					createContext: (trpcCtx) => createTRPContext({ ...trpcCtx }),
 					router: appRouter,
@@ -49,7 +49,9 @@ export const Route = createFileRoute("/api/trpc/$")({
 						console.error("TRPC Error:", error);
 					},
 					path: pathname.replace("/api/trpc/", ""),
-				}),
+				});
+				return response;
+			},
 		},
 	},
 });
