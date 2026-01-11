@@ -10,6 +10,11 @@ const AddAdminSchema = z.object({
 	userEmail: z.string().email(),
 });
 
+const AddMemberSchema = z.object({
+	orgId: z.string(),
+	userEmail: z.string().email(),
+});
+
 const DeleteOrgSchema = z.object({ orgId: z.string() });
 
 export const createOrganization = authedProcedure
@@ -74,6 +79,53 @@ export const addAdmin = authedProcedure
 				isAdmin: true,
 			},
 			update: { isAdmin: true },
+		});
+
+		return { ok: true };
+	});
+
+export const addMember = authedProcedure
+	.input(AddMemberSchema)
+	.mutation(async ({ ctx, input }) => {
+		const user = ctx.user;
+
+		const membership = await prismaClient.organizationUser.findUnique({
+			where: {
+				userId_organizationId: { userId: user.id, organizationId: input.orgId },
+			},
+		});
+
+		if (!membership || !membership.isAdmin) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: "Not authorized",
+			});
+		}
+
+		const target = await prismaClient.user.findUnique({
+			where: { email: input.userEmail },
+		});
+
+		if (!target) {
+			throw new TRPCError({
+				code: "NOT_FOUND",
+				message: "Target user not found",
+			});
+		}
+
+		await prismaClient.organizationUser.upsert({
+			where: {
+				userId_organizationId: {
+					userId: target.id,
+					organizationId: input.orgId,
+				},
+			},
+			create: {
+				userId: target.id,
+				organizationId: input.orgId,
+				isAdmin: false,
+			},
+			update: { isAdmin: false },
 		});
 
 		return { ok: true };

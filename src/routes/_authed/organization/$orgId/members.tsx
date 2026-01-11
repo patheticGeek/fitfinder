@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_authed/organization/$orgId/members")({
 });
 
 function MembersPage() {
-	const { trpc } = useGlobalContext();
+	const { trpc, user } = useGlobalContext();
 
 	const orgId = useMatch({
 		from: "/_authed/organization/$orgId/members",
@@ -22,8 +22,15 @@ function MembersPage() {
 
 	const org = q.data?.org;
 	const members = org?.members ?? [];
+	
+	// Check if current user is admin
+	const currentUserMembership = members.find((m) => m.user.id === user?.id);
+	const isAdmin = currentUserMembership?.isAdmin ?? false;
+
+	const [memberEmail, setMemberEmail] = useState("");
 	const [adminEmail, setAdminEmail] = useState("");
 
+	const addMemberMutation = useMutation(trpc.addMember.mutationOptions());
 	const addAdminMutation = useMutation(trpc.addAdmin.mutationOptions());
 
 	function refresh() {
@@ -41,46 +48,111 @@ function MembersPage() {
 				</div>
 			</div>
 
+			{!isAdmin && (
+				<Card className="mb-6 border-yellow-900/50 bg-yellow-900/10">
+					<CardHeader>
+						<p className="text-sm text-yellow-300">
+							You don't have permission to add members. Only admins can manage team members.
+						</p>
+					</CardHeader>
+				</Card>
+			)}
+
+			{/* Add Member Form */}
+			<Card className="mb-6">
+				<CardHeader>
+					<div className="font-semibold text-lg mb-4">Add Team Member</div>
+					{!isAdmin ? (
+						<p className="text-sm text-muted-foreground">
+							Only admins can add members to this organization.
+						</p>
+					) : (
+						<form
+							onSubmit={(e) => {
+								e.preventDefault();
+								if (!memberEmail.trim()) return alert("Enter an email");
+								addMemberMutation.mutate(
+									{ orgId, userEmail: memberEmail },
+									{
+										onSuccess: () => {
+											setMemberEmail("");
+											refresh();
+										},
+									},
+								);
+							}}
+							className="space-y-3"
+						>
+							<div>
+								<label
+									htmlFor="member-email"
+									className="text-sm font-medium mb-1 block"
+								>
+									Email Address
+								</label>
+								<Input
+									id="member-email"
+									type="email"
+									value={memberEmail}
+									onChange={(e) => setMemberEmail(e.target.value)}
+									className="flex-1"
+									placeholder="user@example.com"
+								/>
+							</div>
+							<Button type="submit" disabled={addMemberMutation.isPending}>
+								{addMemberMutation.isPending ? "Adding..." : "Add as Member"}
+							</Button>
+						</form>
+					)}
+				</CardHeader>
+			</Card>
+
 			{/* Add Admin Form */}
 			<Card className="mb-6">
 				<CardHeader>
-					<div className="font-semibold text-lg mb-4">Add New Admin</div>
-					<form
-						onSubmit={(e) => {
-							e.preventDefault();
-							if (!adminEmail.trim()) return alert("Enter an email");
-							addAdminMutation.mutate(
-								{ orgId, userEmail: adminEmail },
-								{
-									onSuccess: () => {
-										setAdminEmail("");
-										refresh();
+					<div className="font-semibold text-lg mb-4">Promote to Admin</div>
+					{!isAdmin ? (
+						<p className="text-sm text-muted-foreground">
+							Only admins can promote members to admin role.
+						</p>
+					) : (
+						<form
+							onSubmit={(e) => {
+								e.preventDefault();
+								if (!adminEmail.trim()) return alert("Enter an email");
+								addAdminMutation.mutate(
+									{ orgId, userEmail: adminEmail },
+									{
+										onSuccess: () => {
+											setAdminEmail("");
+											refresh();
+										},
 									},
-								},
-							);
-						}}
-						className="space-y-3"
-					>
-						<div>
-							<label
-								htmlFor="admin-email"
-								className="text-sm font-medium mb-1 block"
-							>
-								Email Address
-							</label>
-							<Input
-								id="admin-email"
-								type="email"
-								value={adminEmail}
-								onChange={(e) => setAdminEmail(e.target.value)}
-								className="flex-1"
-								placeholder="user@example.com"
-							/>
-						</div>
-						<Button type="submit" disabled={addAdminMutation.isPending}>
-							{addAdminMutation.isPending ? "Adding..." : "Add Admin"}
-						</Button>
-					</form>
+								);
+							}}
+							className="space-y-3"
+						>
+							<div>
+								<label
+									htmlFor="admin-email"
+									className="text-sm font-medium mb-1 block"
+								>
+									Email Address
+								</label>
+								<Input
+									id="admin-email"
+									type="email"
+									value={adminEmail}
+									onChange={(e) => setAdminEmail(e.target.value)}
+									className="flex-1"
+									placeholder="user@example.com"
+								/>
+							</div>
+							<Button type="submit" disabled={addAdminMutation.isPending}>
+								{addAdminMutation.isPending ? "Adding..." : "Add as Admin"}
+							</Button>
+						</form>
+					)}
 				</CardHeader>
 			</Card>
 

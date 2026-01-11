@@ -4,6 +4,7 @@ import { applyResume } from "~/api/mutations/applyResume";
 import { createJob, deleteJob, updateJob } from "~/api/mutations/jobs";
 import {
 	addAdmin,
+	addMember,
 	createOrganization,
 	deleteOrg,
 } from "~/api/mutations/organizations";
@@ -20,6 +21,7 @@ export const appRouter = t.router({
 	createOrganization,
 	listOrganizations,
 	addAdmin,
+	addMember,
 	createJob,
 	updateJob,
 	getJobCandidates,
