@@ -71,6 +71,10 @@ model Resume {
   interviewQuestions Json? // Optional: list of generated questions
   questionAnswers    QuestionAnswer[]
 
+  // Contact information
+  email String?
+  phone String?
+
   // Profile enrichments
   currentLocation       String?
   totalExperienceMonths Int? // Total experience in months for precision

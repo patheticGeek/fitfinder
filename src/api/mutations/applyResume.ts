@@ -60,6 +60,8 @@ const GeminiStructuredSchema = z.object({
 	skills: z.array(SkillSchema).optional(),
 	currentLocation: z.string().optional(),
 	totalExperienceMonths: z.number().int().min(0).optional(),
+	email: z.string().email().optional(),
+	phone: z.string().optional(),
 });
 
 export type InterviewQuestion = z.infer<typeof InterviewQuestionSchema>;
@@ -99,6 +101,8 @@ async function generateMatchAndQuestionsWithGemini(
 	- skills (array of entries: name, optional level one of beginner|intermediate|expert)
 	- currentLocation (optional)
 	- totalExperienceMonths (optional integer)
+	- email (optional, extracted candidate email address)
+	- phone (optional, extracted candidate phone number)
 
 	<resume>\n${resumeText}\n</resume>
 	<job-description>\n${jobDescription}\n</job-description>
@@ -142,6 +146,8 @@ async function generateMatchAndQuestionsWithGemini(
 			skills: validated.skills ?? [],
 			currentLocation: validated.currentLocation,
 			totalExperienceMonths: validated.totalExperienceMonths,
+			email: validated.email,
+			phone: validated.phone,
 		};
 	} catch (e) {
 		throw new Error(
@@ -197,6 +203,8 @@ export const applyResume = authedProcedure
 						skills: geminiOut.skills,
 						currentLocation: geminiOut.currentLocation ?? undefined,
 						totalExperienceMonths: geminiOut.totalExperienceMonths ?? undefined,
+						email: geminiOut.email ?? undefined,
+						phone: geminiOut.phone ?? undefined,
 						userId: user.id,
 						jobId: jobId ?? undefined,
 						organizationId: orgId ?? undefined,
@@ -224,6 +232,8 @@ export const applyResume = authedProcedure
 				skills: geminiOut.skills,
 				currentLocation: geminiOut.currentLocation ?? null,
 				totalExperienceMonths: geminiOut.totalExperienceMonths ?? null,
+				email: geminiOut.email ?? null,
+				phone: geminiOut.phone ?? null,
 			};
 		} catch (err) {
 			const message = (err as Error)?.message || String(err) || "Unknown error";

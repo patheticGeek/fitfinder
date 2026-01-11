@@ -135,7 +135,37 @@ function CandidatesPage() {
 									</div>
 								</div>
 							)}
-
+							{(selectedResume.email || selectedResume.phone) && (
+								<div>
+									<div className="text-sm font-medium mb-1">
+										Contact Information
+									</div>
+									<div className="text-sm text-muted-foreground space-y-1">
+										{selectedResume.email && (
+											<div className="flex items-center gap-2">
+												<span className="font-medium">Email:</span>
+												<a
+													href={`mailto:${selectedResume.email}`}
+													className="hover:underline"
+												>
+													{selectedResume.email}
+												</a>
+											</div>
+										)}
+										{selectedResume.phone && (
+											<div className="flex items-center gap-2">
+												<span className="font-medium">Phone:</span>
+												<a
+													href={`tel:${selectedResume.phone}`}
+													className="hover:underline"
+												>
+													{selectedResume.phone}
+												</a>
+											</div>
+										)}
+									</div>
+								</div>
+							)}
 							{selectedResume.totalExperienceMonths !== null &&
 								selectedResume.totalExperienceMonths !== undefined && (
 									<div>

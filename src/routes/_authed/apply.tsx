@@ -199,7 +199,25 @@ function ApplyPage() {
 							</p>
 						</div>
 					)}
-
+					{(mutation.data.email || mutation.data.phone) && (
+						<div>
+							<div className="font-semibold">Contact Information</div>
+							<div className="text-gray-300 mt-1 space-y-1">
+								{mutation.data.email && (
+									<div className="flex items-center gap-2">
+										<span className="text-gray-400">Email:</span>
+										<span>{mutation.data.email}</span>
+									</div>
+								)}
+								{mutation.data.phone && (
+									<div className="flex items-center gap-2">
+										<span className="text-gray-400">Phone:</span>
+										<span>{mutation.data.phone}</span>
+									</div>
+								)}
+							</div>
+						</div>
+					)}
 					{mutation.data.totalExperienceMonths !== null &&
 						mutation.data.totalExperienceMonths !== undefined && (
 							<div>
