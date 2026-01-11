@@ -194,7 +194,9 @@ function ApplyPage() {
 					{mutation.data.currentLocation && (
 						<div>
 							<div className="font-semibold">Location</div>
-							<p className="text-gray-300 mt-1">{mutation.data.currentLocation}</p>
+							<p className="text-gray-300 mt-1">
+								{mutation.data.currentLocation}
+							</p>
 						</div>
 					)}
 
