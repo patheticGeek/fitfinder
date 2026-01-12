@@ -616,32 +616,49 @@ function CandidatesPage() {
 										</div>
 									</div>
 								)}
-							{selectedCandidate.skills &&
-								Array.isArray(selectedCandidate.skills) &&
-								selectedCandidate.skills.length > 0 && (
+							{selectedCandidate.resumeSkills &&
+								Array.isArray(selectedCandidate.resumeSkills) &&
+								selectedCandidate.resumeSkills.length > 0 && (
 									<div>
 										<div className="text-lg font-semibold mb-3">Skills</div>
 										<div className="flex flex-wrap gap-2">
-											{selectedCandidate.skills.map((item) => (
-												<SkillBadge key={JSON.stringify(item)} item={item} />
-											))}
+											{selectedCandidate.resumeSkills.map(
+												(rs: {
+													id: string;
+													skill?: { name?: string } | null;
+												}) => (
+													<SkillBadge
+														key={rs.id}
+														item={{ name: rs.skill?.name }}
+													/>
+												),
+											)}
 										</div>
 									</div>
 								)}
-							{selectedCandidate.interviewQuestions &&
-								Array.isArray(selectedCandidate.interviewQuestions) &&
-								selectedCandidate.interviewQuestions.length > 0 && (
+							{selectedCandidate.questionAnswers &&
+								Array.isArray(selectedCandidate.questionAnswers) &&
+								selectedCandidate.questionAnswers.length > 0 && (
 									<div>
 										<div className="text-lg font-semibold mb-3">
 											Suggested Interview Questions
 										</div>
 										<div className="space-y-3">
-											{selectedCandidate.interviewQuestions.map((item, idx) => (
-												<InterviewQuestionCard
-													key={idx.toString()}
-													item={item}
-												/>
-											))}
+											{selectedCandidate.questionAnswers.map(
+												(qa: {
+													id: string;
+													question: string;
+													answer?: string | null;
+												}) => (
+													<InterviewQuestionCard
+														key={qa.id}
+														item={{
+															text: qa.question,
+															correctAnswer: qa.answer,
+														}}
+													/>
+												),
+											)}
 										</div>
 									</div>
 								)}

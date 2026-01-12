@@ -27,7 +27,16 @@ export const getJobCandidates = authedProcedure
 	.query(async ({ input }) => {
 		const job = await prismaClient.job.findUnique({
 			where: { id: input.jobId },
-			include: { resumes: { include: { user: true } }, organization: true },
+			include: {
+				organization: true,
+				resumes: {
+					include: {
+						user: true,
+						questionAnswers: true,
+						resumeSkills: { include: { skill: true } },
+					},
+				},
+			},
 		});
 
 		if (!job) {

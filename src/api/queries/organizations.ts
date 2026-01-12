@@ -84,6 +84,8 @@ export const getOrganizationCandidates = authedProcedure
 			include: {
 				user: true,
 				job: true,
+				questionAnswers: true,
+				resumeSkills: { include: { skill: true } },
 			},
 			orderBy: {
 				createdAt: "desc",

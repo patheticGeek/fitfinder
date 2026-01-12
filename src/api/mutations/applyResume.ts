@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import pdfParse from "pdf-parse";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
+import type { Resume } from "~/prisma-generated/client";
 import { prismaClient } from "~/utils/prisma";
 import { authedProcedure } from "~/utils/trpcServer";
 
@@ -99,7 +100,7 @@ async function generateMatchAndQuestionsWithGemini(
 	- experience (array of entries: company, optional title, startDate, endDate, summary, location,  do not change or paraphrase - use exact text from resume)
 	- projects (array of entries: name, optional description, technologies[], these are side projects, don't mention projects done in experience, do not change or paraphrase - use exact text from resume)
 	- skills (array of entries: name, optional level one of beginner|intermediate|expert)
-	- currentLocation (optional, if no location mentioned explicitly - use the ast job's location)
+	- currentLocation (optional, if no location mentioned explicitly - use the last job's location)
 	- totalExperienceMonths (optional integer)
 	- email (optional, extracted candidate email address)
 	- phone (optional, extracted candidate phone number)
@@ -189,9 +190,9 @@ export const applyResume = authedProcedure
 
 			const id = crypto.randomUUID();
 
-			let resumeRecord = null;
+			let resumeRecord: Resume | null = null;
 			try {
-				// Persist resume and normalized data in one go
+				// Persist resume first
 				resumeRecord = await prismaClient.resume.create({
 					data: {
 						fileName,
@@ -207,38 +208,58 @@ export const applyResume = authedProcedure
 						userId: user.id,
 						jobId: jobId ?? undefined,
 						organizationId: orgId ?? undefined,
-						// Create initial questions as QuestionAnswer rows (answer left null)
-						questionAnswers: {
-							create: (geminiOut.interviewQuestions ?? []).map((q) => ({
-								question: q.text,
-								answer: null,
-							})),
-						},
-						// Link skills via normalized Skill / ResumeSkill tables
-						resumeSkills: {
-							create: Array.from(
-								new Set(
-									(geminiOut.skills ?? [])
-										.map((s) => (s.name || "").trim())
-										.filter((name) => name.length > 0),
-								),
-							).map((name) => ({
-								// Create or connect Skill by unique name
-								skill: {
-									connectOrCreate: {
-										where: { name },
-										create: { name },
-									},
-								},
-							})),
-						},
 					},
 				});
-			} catch (e) {
-				console.warn(
-					"Failed to persist resume record:",
-					(e as Error)?.message || e,
+
+				const resumeId = resumeRecord.id;
+
+				// Create questions separately
+				if (
+					geminiOut.interviewQuestions &&
+					geminiOut.interviewQuestions.length > 0
+				) {
+					await prismaClient.questionAnswer.createMany({
+						data: geminiOut.interviewQuestions.map((q) => ({
+							resumeId,
+							question: q.text,
+							answer: null,
+						})),
+					});
+				}
+
+				// Create skills separately
+				const skillNames = Array.from(
+					new Set(
+						(geminiOut.skills ?? [])
+							.map((s) => (s.name || "").trim())
+							.filter((name) => name.length > 0),
+					),
 				);
+
+				for (const skillName of skillNames) {
+					const skill = await prismaClient.skill.upsert({
+						where: { name: skillName },
+						update: {},
+						create: { name: skillName },
+					});
+
+					await prismaClient.resumeSkill.create({
+						data: {
+							resumeId,
+							skillId: skill.id,
+						},
+					});
+				}
+			} catch (e) {
+				const errMsg = (e as Error)?.message || String(e);
+				console.error(
+					"Failed to persist resume record:",
+					errMsg,
+					"\nFull error:",
+					e,
+				);
+				// Re-throw so caller sees the error
+				throw e;
 			}
 
 			return {
