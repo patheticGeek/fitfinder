@@ -29,7 +29,11 @@ export const login = t.procedure
 
 		const hashedPassword = await hashPassword(input.password);
 
-		if (user.password !== hashedPassword) {
+		const userPassword = await prismaClient.userPassword.findUnique({
+			where: { userId: user.id },
+		});
+
+		if (!userPassword || userPassword.hash !== hashedPassword) {
 			return {
 				error: true,
 				message: "Incorrect password",
@@ -48,10 +52,14 @@ export const signup = t.procedure
 			where: { email: input.email },
 		});
 
-		const password = await hashPassword(input.password);
+		const hashedPassword = await hashPassword(input.password);
 
 		if (found) {
-			if (found.password !== password) {
+			const existingPassword = await prismaClient.userPassword.findUnique({
+				where: { userId: found.id },
+			});
+
+			if (!existingPassword || existingPassword.hash !== hashedPassword) {
 				return {
 					error: true,
 					userExists: true,
@@ -64,7 +72,16 @@ export const signup = t.procedure
 		}
 
 		const user = await prismaClient.user.create({
-			data: { email: input.email, password },
+			data: {
+				email: input.email,
+			},
+		});
+
+		await prismaClient.userPassword.create({
+			data: {
+				userId: user.id,
+				hash: hashedPassword,
+			},
 		});
 
 		await ctx.session.update({ userId: user.id });

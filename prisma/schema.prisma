@@ -13,9 +13,19 @@ datasource db {
 model User {
   id            String             @id @default(uuid())
   email         String             @unique
-  password      String
+  password      UserPassword?
   organizations OrganizationUser[]
   resumes       Resume[]
+  createdAt     DateTime           @default(now())
+}
+
+model UserPassword {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @unique
+  hash      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Organization {
