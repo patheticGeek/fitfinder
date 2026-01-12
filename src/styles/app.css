@@ -126,4 +126,35 @@
 		font-family: "Noto Sans Variable", sans-serif;
 		@apply bg-background text-foreground;
 	}
+
+	/* Custom scrollbars */
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: var(--muted) transparent;
+	}
+
+	*::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+	}
+
+	*::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	*::-webkit-scrollbar-thumb {
+		background: var(--muted);
+		border-radius: 4px;
+		border: 2px solid transparent;
+		background-clip: padding-box;
+	}
+
+	*::-webkit-scrollbar-thumb:hover {
+		background: var(--muted-foreground);
+		background-clip: padding-box;
+	}
+
+	*::-webkit-scrollbar-corner {
+		background: transparent;
+	}
 }
