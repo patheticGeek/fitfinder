@@ -65,11 +65,9 @@ model Resume {
   education          Json? // Array of education entries
   experience         Json? // Array of experience entries with start/end dates
   projects           Json? // Array of projects
-  skills             Json? // Array<{ name: string; level: 'beginner'|'intermediate'|'expert' }>
 
   // Candidate Q&A
-  interviewQuestions Json? // Optional: list of generated questions
-  questionAnswers    QuestionAnswer[]
+  questionAnswers QuestionAnswer[]
 
   // Contact information
   email String?

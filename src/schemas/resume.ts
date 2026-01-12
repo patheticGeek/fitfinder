@@ -36,10 +36,6 @@ export const resumeJSONSchema = z.object({
 	education: educationSchema.array().optional(),
 	experience: experienceSchema.array().optional(),
 	projects: projectSchema.array().optional(),
-	skills: skillItemSchema.array().optional(),
-	interviewQuestions: z
-		.union([interviewQuestionItemSchema.array(), z.string().array()])
-		.optional(),
 });
 
 export type Education = z.infer<typeof educationSchema>;

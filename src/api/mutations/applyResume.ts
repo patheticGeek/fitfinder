@@ -191,16 +191,15 @@ export const applyResume = authedProcedure
 
 			let resumeRecord = null;
 			try {
+				// Persist resume and normalized data in one go
 				resumeRecord = await prismaClient.resume.create({
 					data: {
 						fileName,
 						score: geminiOut.score,
 						scoreJustification: geminiOut.scoreJustification,
-						interviewQuestions: geminiOut.interviewQuestions,
 						education: geminiOut.education,
 						experience: geminiOut.experience,
 						projects: geminiOut.projects,
-						skills: geminiOut.skills,
 						currentLocation: geminiOut.currentLocation ?? undefined,
 						totalExperienceMonths: geminiOut.totalExperienceMonths ?? undefined,
 						email: geminiOut.email ?? undefined,
@@ -208,6 +207,31 @@ export const applyResume = authedProcedure
 						userId: user.id,
 						jobId: jobId ?? undefined,
 						organizationId: orgId ?? undefined,
+						// Create initial questions as QuestionAnswer rows (answer left null)
+						questionAnswers: {
+							create: (geminiOut.interviewQuestions ?? []).map((q) => ({
+								question: q.text,
+								answer: null,
+							})),
+						},
+						// Link skills via normalized Skill / ResumeSkill tables
+						resumeSkills: {
+							create: Array.from(
+								new Set(
+									(geminiOut.skills ?? [])
+										.map((s) => (s.name || "").trim())
+										.filter((name) => name.length > 0),
+								),
+							).map((name) => ({
+								// Create or connect Skill by unique name
+								skill: {
+									connectOrCreate: {
+										where: { name },
+										create: { name },
+									},
+								},
+							})),
+						},
 					},
 				});
 			} catch (e) {
