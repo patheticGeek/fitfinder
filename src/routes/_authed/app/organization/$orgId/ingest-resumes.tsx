@@ -116,9 +116,7 @@ function IngestResumesPage() {
 			setFiles([]);
 			setSelectedJobId(null);
 			setProcessedCount(0);
-			setSuccessMessage(
-				`Successfully submitted ${files.length} resume(s) for processing`,
-			);
+			setSuccessMessage(`Successfully submitted ${files.length} resume(s)`);
 		} catch (err) {
 			const msg = err instanceof Error ? err.message : String(err);
 			setValidationError(`Failed to read files: ${msg}`);

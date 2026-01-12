@@ -4,9 +4,7 @@ import { useState } from "react";
 import type {
 	Education,
 	Experience,
-	InterviewQuestion,
 	Project,
-	Skill,
 } from "~/api/mutations/applyResume";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
@@ -32,7 +30,8 @@ function CandidatesPage() {
 	const job = q.data?.job;
 	const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null);
 
-	const selectedResume = job?.resumes?.find((r) => r.id === selectedResumeId);
+	const resumes = job?.resumes ?? [];
+	const selectedResume = resumes.find((r) => r.id === selectedResumeId) || null;
 
 	return (
 		<Container size="md">
@@ -48,8 +47,8 @@ function CandidatesPage() {
 				<div className="mt-4 text-red-400">Failed to load candidates</div>
 			) : (
 				<div className="mt-4 space-y-3">
-					{job?.resumes?.length ? (
-						job.resumes.map((r) => (
+					{resumes.length ? (
+						resumes.map((r) => (
 							<Card key={r.id}>
 								<CardHeader>
 									<div className="flex items-center justify-between w-full">
@@ -284,53 +283,36 @@ function CandidatesPage() {
 									</div>
 								)}
 
-							{selectedResume.skills &&
-								Array.isArray(selectedResume.skills) &&
-								selectedResume.skills.length > 0 && (
+							{selectedResume.resumeSkills &&
+								selectedResume.resumeSkills.length > 0 && (
 									<div>
 										<div className="text-sm font-medium mb-2">Skills</div>
 										<div className="flex flex-wrap gap-2">
-											{(selectedResume.skills as Skill[]).map((skill, idx) => (
+											{selectedResume.resumeSkills.map((rs, idx) => (
 												<span
-													key={`${skill.name}-${idx}`}
+													key={`${rs.skill?.name ?? rs.id}-${idx}`}
 													className="text-sm bg-gray-200 dark:bg-gray-800 px-3 py-1 rounded-full"
 												>
-													{skill.name}
-													{skill.level && (
-														<span className="text-xs text-muted-foreground ml-1">
-															({skill.level})
-														</span>
-													)}
+													{rs.skill?.name ?? "Skill"}
 												</span>
 											))}
 										</div>
 									</div>
 								)}
 
-							{selectedResume.interviewQuestions &&
-								Array.isArray(selectedResume.interviewQuestions) &&
-								selectedResume.interviewQuestions.length > 0 && (
+							{selectedResume.questionAnswers &&
+								selectedResume.questionAnswers.length > 0 && (
 									<div>
 										<div className="text-sm font-medium mb-2">
 											Interview Questions
 										</div>
 										<ol className="list-decimal ml-6 space-y-2">
-											{(
-												selectedResume.interviewQuestions as InterviewQuestion[]
-											).map((q, idx) => (
-												<li key={`q-${idx}`} className="text-sm">
-													<div>{q.text}</div>
-													{q.correctAnswer && (
+											{selectedResume.questionAnswers.map((qa, idx) => (
+												<li key={`qa-${qa.id}-${idx}`} className="text-sm">
+													<div>{qa.question}</div>
+													{qa.answer && (
 														<div className="text-xs text-muted-foreground mt-1">
-															Suggested answer: {q.correctAnswer}
-														</div>
-													)}
-													{(q.topic || q.confidence !== undefined) && (
-														<div className="text-xs text-muted-foreground mt-0.5">
-															{q.topic && `Topic: ${q.topic}`}
-															{q.topic && q.confidence !== undefined && " • "}
-															{q.confidence !== undefined &&
-																`Confidence: ${Math.round(q.confidence * 100)}%`}
+															Suggested answer: {qa.answer}
 														</div>
 													)}
 												</li>
