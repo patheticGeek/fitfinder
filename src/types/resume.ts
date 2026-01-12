@@ -34,6 +34,4 @@ export interface ResumeJSONShape {
 	education?: ResumeEducation[];
 	experience?: ResumeExperience[];
 	projects?: ResumeProject[];
-	skills?: ResumeSkillItem[];
-	interviewQuestions?: InterviewQuestionItem[] | string[];
 }

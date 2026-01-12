@@ -45,8 +45,6 @@ export function parseResumeJSON(resume: Resume): ResumeJSONShape {
 		education: resume.education ?? undefined,
 		experience: resume.experience ?? undefined,
 		projects: resume.projects ?? undefined,
-		skills: (resume as Resume & { skills?: unknown }).skills ?? undefined,
-		interviewQuestions: resume.interviewQuestions ?? undefined,
 	};
 	const parsed = resumeJSONSchema.safeParse(obj);
 	return parsed.success ? parsed.data : {};
