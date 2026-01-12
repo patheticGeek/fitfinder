@@ -57,3 +57,38 @@ export const getOrganization = authedProcedure
 
 		return { org };
 	});
+const GetOrganizationCandidatesSchema = z.object({ orgId: z.string() });
+
+export const getOrganizationCandidates = authedProcedure
+	.input(GetOrganizationCandidatesSchema)
+	.query(async ({ ctx, input }) => {
+		const user = ctx.user;
+
+		const membership = await prismaClient.organizationUser.findUnique({
+			where: {
+				userId_organizationId: {
+					userId: user.id,
+					organizationId: input.orgId,
+				},
+			},
+		});
+
+		if (!membership) {
+			throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
+		}
+
+		const resumes = await prismaClient.resume.findMany({
+			where: {
+				organizationId: input.orgId,
+			},
+			include: {
+				user: true,
+				job: true,
+			},
+			orderBy: {
+				createdAt: "desc",
+			},
+		});
+
+		return { resumes };
+	});

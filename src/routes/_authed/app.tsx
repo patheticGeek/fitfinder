@@ -10,6 +10,7 @@ import {
 	FileUp,
 	LayoutDashboard,
 	LogOut,
+	UserCheck,
 	Users,
 } from "lucide-react";
 import { OrganizationSelector } from "~/components/OrganizationSelector";
@@ -99,6 +100,21 @@ function AppLayout() {
 												>
 													<Briefcase className="h-4 w-4" />
 													<span>Jobs</span>
+												</SidebarMenuButton>
+											</Link>
+										</SidebarMenuItem>
+
+										<SidebarMenuItem>
+											<Link
+												to="/app/organization/$orgId/candidates"
+												params={{ orgId: currentOrgId }}
+												activeProps={{ className: "font-semibold" }}
+											>
+												<SidebarMenuButton
+													isActive={currentPath.includes("/candidates")}
+												>
+													<UserCheck className="h-4 w-4" />
+													<span>Candidates</span>
 												</SidebarMenuButton>
 											</Link>
 										</SidebarMenuItem>

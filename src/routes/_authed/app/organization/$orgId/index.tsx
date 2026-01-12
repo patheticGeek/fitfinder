@@ -108,6 +108,9 @@ function OrgPage() {
 						<Link to="/app/organization/$orgId/jobs" params={{ orgId }}>
 							<Button variant="outline">Manage Jobs</Button>
 						</Link>
+						<Link to="/app/organization/$orgId/candidates" params={{ orgId }}>
+							<Button variant="outline">View Candidates</Button>
+						</Link>
 					</div>
 
 					{/* Recent Jobs */}
