@@ -43,7 +43,7 @@ export const getOrganization = authedProcedure
 			where: { id: input.orgId },
 			include: {
 				members: { include: { user: true } },
-				jobs: { include: { resumes: { include: { user: true } } } },
+				jobs: { include: { resumes: { include: { addedByUser: true } } } },
 				resumes: true,
 			},
 		});
@@ -82,7 +82,7 @@ export const getOrganizationCandidates = authedProcedure
 				organizationId: input.orgId,
 			},
 			include: {
-				user: true,
+				addedByUser: true,
 				job: true,
 				questionAnswers: true,
 				resumeSkills: { include: { skill: true } },

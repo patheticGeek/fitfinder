@@ -62,8 +62,8 @@ model Job {
 
 model Resume {
   id                 String        @id @default(uuid())
-  user               User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId             String?
+  addedByUser        User?         @relation(fields: [addedByUserId], references: [id], onDelete: Cascade)
+  addedByUserId      String?       @map("userId")
   job                Job?          @relation(fields: [jobId], references: [id], onDelete: Cascade)
   jobId              String?
   organization       Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)

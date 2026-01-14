@@ -53,7 +53,7 @@ type CandidateRow = {
 	email: string | null;
 	phone: string | null;
 	currentLocation: string | null;
-	user?: { email?: string } | null;
+	addedByUser?: { email?: string } | null;
 	job?: { title?: string; id?: string } | null;
 };
 
@@ -234,15 +234,15 @@ export const Route = createFileRoute(
 });
 
 const allColumns = [
-	{ key: "userEmail", label: "Candidate Email" },
+	{ key: "email", label: "Resume Email" },
 	{ key: "jobTitle", label: "Job Applied For" },
 	{ key: "score", label: "Match Score" },
 	{ key: "scoreJustification", label: "Justification" },
-	{ key: "email", label: "Resume Email" },
 	{ key: "phone", label: "Phone" },
 	{ key: "currentLocation", label: "Location" },
 	{ key: "totalExperienceMonths", label: "Experience (months)" },
 	{ key: "createdAt", label: "Applied Date" },
+	{ key: "addedByEmail", label: "Added By" },
 ];
 
 function CandidatesPage() {
@@ -264,7 +264,7 @@ function CandidatesPage() {
 	const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
 		() =>
 			new Set([
-				"userEmail",
+				"addedByEmail",
 				"jobTitle",
 				"score",
 				"scoreJustification",
@@ -374,8 +374,8 @@ function CandidatesPage() {
 				return resume.phone || "N/A";
 			case "currentLocation":
 				return resume.currentLocation || "N/A";
-			case "userEmail":
-				return resume.user?.email || "Unknown";
+			case "addedByEmail":
+				return resume.addedByUser?.email || "Unknown";
 			case "jobTitle":
 				return resume.job?.title || "No Job";
 			default:
@@ -530,11 +530,9 @@ function CandidatesPage() {
 							{/* Basic Info */}
 							<div className="grid grid-cols-2 gap-4">
 								<div>
-									<div className="text-sm text-muted-foreground">
-										Candidate Email
-									</div>
+									<div className="text-sm text-muted-foreground">Added By</div>
 									<div className="font-medium">
-										{selectedCandidate.user?.email || "Unknown"}
+										{selectedCandidate.addedByUser?.email || "Unknown"}
 									</div>
 								</div>
 								<div>

@@ -205,7 +205,7 @@ export const applyResume = authedProcedure
 						totalExperienceMonths: geminiOut.totalExperienceMonths ?? undefined,
 						email: geminiOut.email ?? undefined,
 						phone: geminiOut.phone ?? undefined,
-						userId: user.id,
+						addedByUserId: user.id,
 						jobId: jobId ?? undefined,
 						organizationId: orgId ?? undefined,
 					},
