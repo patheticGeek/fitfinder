@@ -1,9 +1,15 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useMatch } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	useMatch,
+	useNavigate,
+	useSearch,
+} from "@tanstack/react-router";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useMemo, useState } from "react";
+import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import {
 	Dialog,
@@ -216,10 +222,15 @@ const InterviewQuestionCard = ({ item }: { item: unknown }) => {
 	);
 };
 
+const candidatesSearchSchema = z.object({
+	jobId: z.string().optional(),
+});
+
 export const Route = createFileRoute(
 	"/_authed/app/organization/$orgId/candidates",
 )({
 	component: CandidatesPage,
+	validateSearch: candidatesSearchSchema,
 });
 
 const allColumns = [
@@ -236,17 +247,29 @@ const allColumns = [
 
 function CandidatesPage() {
 	const { trpc } = useGlobalContext();
+	const navigate = useNavigate();
 
-	const orgId = useMatch({
+	const { orgId } = useMatch({
 		from: "/_authed/app/organization/$orgId/candidates",
-		select: (s) => s.params.orgId,
+		select: (s) => s.params,
+	});
+
+	const { jobId } = useSearch({
+		from: "/_authed/app/organization/$orgId/candidates",
 	});
 
 	const q = useQuery(trpc.getOrganizationCandidates.queryOptions({ orgId }));
 
-	const [selectedJob, setSelectedJob] = useState<string | null>(null);
+	const selectedJob = jobId || null;
 	const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
-		new Set(["userEmail", "jobTitle", "score", "scoreJustification", "email"]),
+		() =>
+			new Set([
+				"userEmail",
+				"jobTitle",
+				"score",
+				"scoreJustification",
+				"email",
+			]),
 	);
 	const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
 	const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(
@@ -396,9 +419,14 @@ function CandidatesPage() {
 					<span className="text-sm font-medium">Filter by Job:</span>
 					<Select
 						value={selectedJob || ""}
-						onValueChange={(value) =>
-							setSelectedJob(value === "" ? null : value)
-						}
+						onValueChange={(value) => {
+							navigate({
+								to: ".",
+								search: {
+									jobId: value === "" ? undefined : (value as string),
+								},
+							});
+						}}
 					>
 						<SelectTrigger className="w-48">
 							<SelectValue />

@@ -142,14 +142,6 @@ function OrgPage() {
 													{job.resumes.length === 1 ? "" : "s"}
 												</div>
 											</div>
-											<Link
-												to="/app/organization/$orgId/job/$jobId/candidates"
-												params={{ orgId, jobId: job.id }}
-											>
-												<Button size="sm" variant="ghost">
-													View
-												</Button>
-											</Link>
 										</div>
 									))}
 								</div>

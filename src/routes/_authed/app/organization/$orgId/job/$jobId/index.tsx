@@ -68,8 +68,9 @@ function JobEditPage() {
 				<h2 className="text-xl font-bold">Edit Job</h2>
 				<div className="flex gap-2">
 					<Link
-						to="/app/organization/$orgId/job/$jobId/candidates"
-						params={{ orgId, jobId }}
+						to="/app/organization/$orgId/candidates"
+						params={{ orgId }}
+						search={{ jobId }}
 					>
 						<Button size="sm" variant="secondary">
 							View Candidates
