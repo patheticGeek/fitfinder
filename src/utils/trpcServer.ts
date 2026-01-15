@@ -24,7 +24,6 @@ const authenticated = t.middleware(async ({ ctx, next }) => {
 
 	const user = await prismaClient.user.findUnique({
 		where: { id: ctx.session.data.userId },
-		omit: { password: true },
 	});
 
 	if (!user) {
