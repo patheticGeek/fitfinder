@@ -41,4 +41,6 @@ export const resumeJSONSchema = z.object({
 export type Education = z.infer<typeof educationSchema>;
 export type Experience = z.infer<typeof experienceSchema>;
 export type Project = z.infer<typeof projectSchema>;
+export type SkillItem = z.infer<typeof skillItemSchema>;
+export type InterviewQuestionItem = z.infer<typeof interviewQuestionItemSchema>;
 export type ResumeJSON = z.infer<typeof resumeJSONSchema>;

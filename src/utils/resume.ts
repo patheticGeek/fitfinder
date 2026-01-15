@@ -5,34 +5,32 @@ import {
 	projectSchema,
 	resumeJSONSchema,
 	skillItemSchema,
+	type Education,
+	type Experience,
+	type Project,
+	type ResumeJSON,
+	type SkillItem,
 } from "../schemas/resume";
-import type {
-	ResumeEducation,
-	ResumeExperience,
-	ResumeJSONShape,
-	ResumeProject,
-	ResumeSkillItem,
-} from "../types/resume";
 
-export function parseEducation(resume: Resume): ResumeEducation[] {
+export function parseEducation(resume: Resume): Education[] {
 	if (!resume.education) return [];
 	const parsed = educationSchema.array().safeParse(resume.education);
 	return parsed.success ? parsed.data : [];
 }
 
-export function parseExperience(resume: Resume): ResumeExperience[] {
+export function parseExperience(resume: Resume): Experience[] {
 	if (!resume.experience) return [];
 	const parsed = experienceSchema.array().safeParse(resume.experience);
 	return parsed.success ? parsed.data : [];
 }
 
-export function parseProjects(resume: Resume): ResumeProject[] {
+export function parseProjects(resume: Resume): Project[] {
 	if (!resume.projects) return [];
 	const parsed = projectSchema.array().safeParse(resume.projects);
 	return parsed.success ? parsed.data : [];
 }
 
-export function parseSkills(resume: Resume): ResumeSkillItem[] {
+export function parseSkills(resume: Resume): SkillItem[] {
 	type ResumeWithSkills = Resume & { skills?: unknown };
 	const skills = (resume as ResumeWithSkills).skills;
 	if (!skills) return [];
@@ -40,7 +38,7 @@ export function parseSkills(resume: Resume): ResumeSkillItem[] {
 	return parsed.success ? parsed.data : [];
 }
 
-export function parseResumeJSON(resume: Resume): ResumeJSONShape {
+export function parseResumeJSON(resume: Resume): ResumeJSON {
 	const obj: Record<string, unknown> = {
 		education: resume.education ?? undefined,
 		experience: resume.experience ?? undefined,
@@ -50,27 +48,27 @@ export function parseResumeJSON(resume: Resume): ResumeJSONShape {
 	return parsed.success ? parsed.data : {};
 }
 
-export function validateEducation(data: ResumeEducation[]): ResumeEducation[] {
+export function validateEducation(data: Education[]): Education[] {
 	return educationSchema.array().parse(data);
 }
 
 export function validateExperience(
-	data: ResumeExperience[],
-): ResumeExperience[] {
+	data: Experience[],
+): Experience[] {
 	return experienceSchema.array().parse(data);
 }
 
-export function validateProjects(data: ResumeProject[]): ResumeProject[] {
+export function validateProjects(data: Project[]): Project[] {
 	return projectSchema.array().parse(data);
 }
 
-export function validateSkills(data: ResumeSkillItem[]): ResumeSkillItem[] {
+export function validateSkills(data: SkillItem[]): SkillItem[] {
 	return skillItemSchema.array().parse(data);
 }
 
 // Utility to compute total months of experience from entries
 export function computeTotalExperienceMonths(
-	entries: ResumeExperience[],
+	entries: Experience[],
 ): number {
 	const toMonthIndex = (d: string): number => {
 		const date = new Date(d);

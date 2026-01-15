@@ -2,20 +2,29 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useMatch } from "@tanstack/react-router";
-import { useState } from "react";
-import type {
-	Education,
-	Experience,
-	Project,
-} from "~/api/mutations/applyResume";
+import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
+import type { AppRouterInputs } from "~/routes/api/trpc/$";
 import { useGlobalContext } from "~/utils/hooks";
 
 export const Route = createFileRoute("/apply/$jobId/$code")({
 	component: ApplyPage,
 });
+
+type SubmitInput = AppRouterInputs["submitInviteApplication"];
+
+// Use Record<string, unknown> for JSON fields from Prisma/tRPC
+type EducationEntry = Record<string, unknown>;
+type ExperienceEntry = Record<string, unknown>;
+type ProjectEntry = Record<string, unknown>;
+
+type WithId<T> = T & { __id: string };
+
+// Helper to safely get string value from Record
+const getString = (obj: Record<string, unknown>, key: string): string =>
+	String(obj[key] ?? "");
 
 function ApplyPage() {
 	const { trpc } = useGlobalContext();
@@ -29,74 +38,69 @@ function ApplyPage() {
 
 	const [email, setEmail] = useState("");
 	const [phone, setPhone] = useState("");
-
-	// simple dynamic lists
 	const [skills, setSkills] = useState<string[]>([]);
 	const [newSkill, setNewSkill] = useState("");
+	const [education, setEducation] = useState<WithId<EducationEntry>[]>([]);
+	const [experience, setExperience] = useState<WithId<ExperienceEntry>[]>([]);
+	const [projects, setProjects] = useState<WithId<ProjectEntry>[]>([]);
+	const [answers, setAnswers] = useState<
+		NonNullable<SubmitInput["answers"]>[number][]
+	>([]);
 
-	type WithId<T> = T & { __id: string };
-	const [education, setEducation] = useState<WithId<Education>[]>([]);
-	const [experience, setExperience] = useState<WithId<Experience>[]>([]);
-	const [projects, setProjects] = useState<WithId<Project>[]>([]);
+	// Initialize state when data loads
+	useEffect(() => {
+		const resume = inviteQ.data?.resume;
+		if (!resume) return;
 
-	const [answers, setAnswers] = useState<{ id: string; answer: string }[]>([]);
-
-	// initialize state when data loads
-	type InviteResume = {
-		email?: string | null;
-		phone?: string | null;
-		education?: Education[] | null;
-		experience?: Experience[] | null;
-		projects?: Project[] | null;
-		resumeSkills: { id: string; skill?: { name?: string } | null }[];
-		questionAnswers: { id: string; question: string; answer?: string | null }[];
-		job?: { title?: string | null } | null;
-	};
-	const resume = inviteQ.data?.resume as unknown as InviteResume;
-
-	const initialized =
-		!!resume &&
-		answers.length === 0 &&
-		skills.length === 0 &&
-		education.length === 0 &&
-		experience.length === 0 &&
-		projects.length === 0;
-	if (initialized) {
 		setEmail(resume.email ?? "");
 		setPhone(resume.phone ?? "");
+
+		const educationData = Array.isArray(resume.education)
+			? (resume.education as EducationEntry[])
+			: [];
 		setEducation(
-			(Array.isArray(resume.education) ? resume.education : []).map((e) => ({
+			educationData.map((e) => ({
 				...(e || {}),
 				__id: crypto.randomUUID(),
 			})),
 		);
+
+		const experienceData = Array.isArray(resume.experience)
+			? (resume.experience as ExperienceEntry[])
+			: [];
 		setExperience(
-			(Array.isArray(resume.experience) ? resume.experience : []).map((e) => ({
+			experienceData.map((e) => ({
 				...(e || {}),
 				__id: crypto.randomUUID(),
 			})),
 		);
+
+		const projectsData = Array.isArray(resume.projects)
+			? (resume.projects as ProjectEntry[])
+			: [];
 		setProjects(
-			(Array.isArray(resume.projects) ? resume.projects : []).map((p) => ({
+			projectsData.map((p) => ({
 				...(p || {}),
 				__id: crypto.randomUUID(),
 			})),
 		);
+
 		setSkills(
 			(resume.resumeSkills ?? [])
 				.map((rs) => rs?.skill?.name || "")
 				.filter(Boolean),
 		);
+
 		setAnswers(
 			(resume.questionAnswers ?? []).map((qa) => ({
 				id: qa.id,
 				answer: qa.answer ?? "",
 			})),
 		);
-	}
+	}, [inviteQ.data]);
 
 	const onSubmit = async () => {
-		await submitM.mutateAsync({
+		const input: SubmitInput = {
 			code,
 			jobId,
 			email: email || undefined,
@@ -106,7 +110,8 @@ function ApplyPage() {
 			projects: projects.map(({ __id, ...rest }) => rest),
 			skills,
 			answers: answers.filter((a) => a.answer && a.answer.trim().length > 0),
-		});
+		};
+		await submitM.mutateAsync(input);
 		alert("Application submitted successfully!");
 	};
 
@@ -120,6 +125,8 @@ function ApplyPage() {
 			</div>
 		);
 	}
+
+	const resume = inviteQ.data?.resume;
 
 	return (
 		<div className="max-w-3xl mx-auto p-6 space-y-8">
@@ -201,20 +208,18 @@ function ApplyPage() {
 				<Button
 					type="button"
 					variant="outline"
-					onClick={() =>
-						setEducation([
-							...education,
-							{
-								institution: "",
-								degree: "",
-								field: "",
-								startDate: "",
-								endDate: "",
-								location: "",
-								__id: crypto.randomUUID(),
-							},
-						])
-					}
+					onClick={() => {
+						const newEntry: WithId<EducationEntry> = {
+							institution: "",
+							degree: undefined,
+							field: undefined,
+							startDate: undefined,
+							endDate: undefined,
+							location: undefined,
+							__id: crypto.randomUUID(),
+						};
+						setEducation([...education, newEntry]);
+					}}
 				>
 					Add Education
 				</Button>
@@ -226,7 +231,7 @@ function ApplyPage() {
 						>
 							<Input
 								placeholder="Institution"
-								value={item.institution ?? ""}
+								value={getString(item, "institution")}
 								onChange={(e) => {
 									setEducation((prev) =>
 										prev.map((it) =>
@@ -239,7 +244,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="Degree"
-								value={item.degree ?? ""}
+								value={getString(item, "degree")}
 								onChange={(e) => {
 									setEducation((prev) =>
 										prev.map((it) =>
@@ -252,7 +257,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="Field"
-								value={item.field ?? ""}
+								value={getString(item, "field")}
 								onChange={(e) => {
 									setEducation((prev) =>
 										prev.map((it) =>
@@ -265,7 +270,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="Start Date"
-								value={item.startDate ?? ""}
+								value={getString(item, "startDate")}
 								onChange={(e) => {
 									setEducation((prev) =>
 										prev.map((it) =>
@@ -278,7 +283,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="End Date"
-								value={item.endDate ?? ""}
+								value={getString(item, "endDate")}
 								onChange={(e) => {
 									setEducation((prev) =>
 										prev.map((it) =>
@@ -291,7 +296,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="Location"
-								value={item.location ?? ""}
+								value={getString(item, "location")}
 								onChange={(e) => {
 									setEducation((prev) =>
 										prev.map((it) =>
@@ -323,20 +328,18 @@ function ApplyPage() {
 				<Button
 					type="button"
 					variant="outline"
-					onClick={() =>
-						setExperience([
-							...experience,
-							{
-								company: "",
-								title: "",
-								startDate: "",
-								endDate: "",
-								summary: "",
-								location: "",
-								__id: crypto.randomUUID(),
-							},
-						])
-					}
+					onClick={() => {
+						const newEntry: WithId<ExperienceEntry> = {
+							company: "",
+							title: undefined,
+							startDate: undefined,
+							endDate: undefined,
+							summary: undefined,
+							location: undefined,
+							__id: crypto.randomUUID(),
+						};
+						setExperience([...experience, newEntry]);
+					}}
 				>
 					Add Experience
 				</Button>
@@ -348,7 +351,7 @@ function ApplyPage() {
 						>
 							<Input
 								placeholder="Company"
-								value={item.company ?? ""}
+								value={getString(item, "company")}
 								onChange={(e) => {
 									setExperience((prev) =>
 										prev.map((it) =>
@@ -361,7 +364,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="Title"
-								value={item.title ?? ""}
+								value={getString(item, "title")}
 								onChange={(e) => {
 									setExperience((prev) =>
 										prev.map((it) =>
@@ -374,7 +377,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="Start Date"
-								value={item.startDate ?? ""}
+								value={getString(item, "startDate")}
 								onChange={(e) => {
 									setExperience((prev) =>
 										prev.map((it) =>
@@ -387,7 +390,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="End Date"
-								value={item.endDate ?? ""}
+								value={getString(item, "endDate")}
 								onChange={(e) => {
 									setExperience((prev) =>
 										prev.map((it) =>
@@ -400,7 +403,7 @@ function ApplyPage() {
 							/>
 							<Textarea
 								placeholder="Summary"
-								value={item.summary ?? ""}
+								value={getString(item, "summary")}
 								onChange={(e) => {
 									setExperience((prev) =>
 										prev.map((it) =>
@@ -413,7 +416,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="Location"
-								value={item.location ?? ""}
+								value={getString(item, "location")}
 								onChange={(e) => {
 									setExperience((prev) =>
 										prev.map((it) =>
@@ -445,17 +448,15 @@ function ApplyPage() {
 				<Button
 					type="button"
 					variant="outline"
-					onClick={() =>
-						setProjects([
-							...projects,
-							{
-								name: "",
-								description: "",
-								technologies: [],
-								__id: crypto.randomUUID(),
-							},
-						])
-					}
+					onClick={() => {
+						const newEntry: WithId<ProjectEntry> = {
+							name: "",
+							description: undefined,
+							technologies: undefined,
+							__id: crypto.randomUUID(),
+						};
+						setProjects([...projects, newEntry]);
+					}}
 				>
 					Add Project
 				</Button>
@@ -467,7 +468,7 @@ function ApplyPage() {
 						>
 							<Input
 								placeholder="Name"
-								value={item.name ?? ""}
+								value={getString(item, "name")}
 								onChange={(e) => {
 									setProjects((prev) =>
 										prev.map((it) =>
@@ -480,7 +481,7 @@ function ApplyPage() {
 							/>
 							<Textarea
 								placeholder="Description"
-								value={item.description ?? ""}
+								value={getString(item, "description")}
 								onChange={(e) => {
 									setProjects((prev) =>
 										prev.map((it) =>
