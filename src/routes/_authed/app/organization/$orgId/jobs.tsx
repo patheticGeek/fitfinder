@@ -24,6 +24,8 @@ function JobsPage() {
 	const org = q.data?.org;
 	const [jobTitle, setJobTitle] = useState("");
 	const [jobDesc, setJobDesc] = useState("");
+	const [additionalInstructions, setAdditionalInstructions] = useState("");
+	const [suggestedQuestions, setSuggestedQuestions] = useState("");
 
 	const createJobMutation = useMutation(trpc.createJob.mutationOptions());
 	const deleteJobMutation = useMutation(trpc.deleteJob.mutationOptions());
@@ -77,17 +79,57 @@ function JobsPage() {
 								rows={6}
 							/>
 						</div>
+						<div className="grid grid-cols-2 gap-3">
+							<div>
+								<label
+									htmlFor="additional-instructions"
+									className="text-sm font-medium mb-1 block"
+								>
+									Additional Instructions
+								</label>
+								<Textarea
+									id="additional-instructions"
+									placeholder="LLM guidance: hard must-haves, red flags, context to evaluate in the resume"
+									value={additionalInstructions}
+									onChange={(e) => setAdditionalInstructions(e.target.value)}
+									rows={4}
+								/>
+							</div>
+							<div>
+								<label
+									htmlFor="suggested-questions"
+									className="text-sm font-medium mb-1 block"
+								>
+									Suggested Questions
+								</label>
+								<Textarea
+									id="suggested-questions"
+									placeholder="Optional: suggested questions & answers"
+									value={suggestedQuestions}
+									onChange={(e) => setSuggestedQuestions(e.target.value)}
+									rows={4}
+								/>
+							</div>
+						</div>
 						<Button
 							onClick={(e) => {
 								e.preventDefault();
 								if (!jobTitle.trim()) return alert("Enter job title");
 								if (!jobDesc.trim()) return alert("Enter job description");
 								createJobMutation.mutate(
-									{ orgId, title: jobTitle, description: jobDesc },
+									{
+										orgId,
+										title: jobTitle,
+										description: jobDesc,
+										additionalInstructions: additionalInstructions || undefined,
+										suggestedQuestions: suggestedQuestions || undefined,
+									},
 									{
 										onSuccess: () => {
 											setJobTitle("");
 											setJobDesc("");
+											setAdditionalInstructions("");
+											setSuggestedQuestions("");
 											refresh();
 										},
 									},
