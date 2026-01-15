@@ -182,7 +182,7 @@ function ApplyPage() {
 							id="phone"
 							value={phone}
 							onChange={(e) => setPhone(e.target.value)}
-							placeholder="+1 234 567 8910"
+							placeholder="+912345678910"
 						/>
 					</div>
 				</div>
@@ -246,88 +246,145 @@ function ApplyPage() {
 				</Button>
 				<div className="space-y-3">
 					{education.map((item) => (
-						<div
-							key={item.__id}
-							className="grid grid-cols-1 sm:grid-cols-2 gap-2 border rounded p-3"
-						>
-							<Input
-								placeholder="Institution"
-								value={item.institution ?? ""}
-								onChange={(e) => {
-									setEducation((prev) =>
-										prev.map((it) =>
-											it.__id === item.__id
-												? { ...it, institution: e.target.value }
-												: it,
-										),
-									);
-								}}
-							/>
-							<Input
-								placeholder="Degree"
-								value={item.degree ?? ""}
-								onChange={(e) => {
-									setEducation((prev) =>
-										prev.map((it) =>
-											it.__id === item.__id
-												? { ...it, degree: e.target.value }
-												: it,
-										),
-									);
-								}}
-							/>
-							<Input
-								placeholder="Field"
-								value={item.field ?? ""}
-								onChange={(e) => {
-									setEducation((prev) =>
-										prev.map((it) =>
-											it.__id === item.__id
-												? { ...it, field: e.target.value }
-												: it,
-										),
-									);
-								}}
-							/>
-							<Input
-								placeholder="Start Date"
-								value={item.startDate ?? ""}
-								onChange={(e) => {
-									setEducation((prev) =>
-										prev.map((it) =>
-											it.__id === item.__id
-												? { ...it, startDate: e.target.value }
-												: it,
-										),
-									);
-								}}
-							/>
-							<Input
-								placeholder="End Date"
-								value={item.endDate ?? ""}
-								onChange={(e) => {
-									setEducation((prev) =>
-										prev.map((it) =>
-											it.__id === item.__id
-												? { ...it, endDate: e.target.value }
-												: it,
-										),
-									);
-								}}
-							/>
-							<Input
-								placeholder="Location"
-								value={item.location ?? ""}
-								onChange={(e) => {
-									setEducation((prev) =>
-										prev.map((it) =>
-											it.__id === item.__id
-												? { ...it, location: e.target.value }
-												: it,
-										),
-									);
-								}}
-							/>
+						<div key={item.__id} className="space-y-3 border rounded p-3">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+								<div>
+									<label
+										htmlFor={`edu-institution-${item.__id}`}
+										className="text-sm text-muted-foreground"
+									>
+										Name of Institute
+									</label>
+									<Input
+										id={`edu-institution-${item.__id}`}
+										placeholder="Name of Institute"
+										value={item.institution ?? ""}
+										onChange={(e) => {
+											setEducation((prev) =>
+												prev.map((it) =>
+													it.__id === item.__id
+														? { ...it, institution: e.target.value }
+														: it,
+												),
+											);
+										}}
+									/>
+								</div>
+								<div>
+									<label
+										htmlFor={`edu-location-${item.__id}`}
+										className="text-sm text-muted-foreground"
+									>
+										Location
+									</label>
+									<Input
+										id={`edu-location-${item.__id}`}
+										placeholder="Location"
+										value={item.location ?? ""}
+										onChange={(e) => {
+											setEducation((prev) =>
+												prev.map((it) =>
+													it.__id === item.__id
+														? { ...it, location: e.target.value }
+														: it,
+												),
+											);
+										}}
+									/>
+								</div>
+							</div>
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+								<div>
+									<label
+										htmlFor={`edu-degree-${item.__id}`}
+										className="text-sm text-muted-foreground"
+									>
+										Degree
+									</label>
+									<Input
+										id={`edu-degree-${item.__id}`}
+										placeholder="Degree"
+										value={item.degree ?? ""}
+										onChange={(e) => {
+											setEducation((prev) =>
+												prev.map((it) =>
+													it.__id === item.__id
+														? { ...it, degree: e.target.value }
+														: it,
+												),
+											);
+										}}
+									/>
+								</div>
+								<div>
+									<label
+										htmlFor={`edu-field-${item.__id}`}
+										className="text-sm text-muted-foreground"
+									>
+										Field
+									</label>
+									<Input
+										id={`edu-field-${item.__id}`}
+										placeholder="Field"
+										value={item.field ?? ""}
+										onChange={(e) => {
+											setEducation((prev) =>
+												prev.map((it) =>
+													it.__id === item.__id
+														? { ...it, field: e.target.value }
+														: it,
+												),
+											);
+										}}
+									/>
+								</div>
+							</div>
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+								<div>
+									<label
+										htmlFor={`edu-start-${item.__id}`}
+										className="text-sm text-muted-foreground"
+									>
+										Start Year
+									</label>
+									<Input
+										id={`edu-start-${item.__id}`}
+										placeholder="Start Year"
+										value={item.startDate ?? ""}
+										onChange={(e) => {
+											setEducation((prev) =>
+												prev.map((it) =>
+													it.__id === item.__id
+														? { ...it, startDate: e.target.value }
+														: it,
+												),
+											);
+										}}
+									/>
+								</div>
+								<div>
+									<label
+										htmlFor={`edu-end-${item.__id}`}
+										className="text-sm text-muted-foreground"
+									>
+										End Year
+									</label>
+									<Input
+										id={`edu-end-${item.__id}`}
+										placeholder="End Year"
+										value={item.endDate ?? ""}
+										onChange={(e) => {
+											setEducation((prev) =>
+												prev.map((it) =>
+													it.__id === item.__id
+														? { ...it, endDate: e.target.value }
+														: it,
+												),
+											);
+										}}
+									/>
+								</div>
+							</div>
 							<Button
 								type="button"
 								variant="destructive"
@@ -366,88 +423,121 @@ function ApplyPage() {
 				</Button>
 				<div className="space-y-3">
 					{experience.map((item) => (
-						<div
-							key={item.__id}
-							className="grid grid-cols-1 sm:grid-cols-2 gap-2 border rounded p-3"
-						>
-							<Input
-								placeholder="Company"
-								value={item.company ?? ""}
-								onChange={(e) => {
-									setExperience((prev) =>
-										prev.map((it) =>
-											it.__id === item.__id
-												? { ...it, company: e.target.value }
-												: it,
-										),
-									);
-								}}
-							/>
-							<Input
-								placeholder="Title"
-								value={item.title ?? ""}
-								onChange={(e) => {
-									setExperience((prev) =>
-										prev.map((it) =>
-											it.__id === item.__id
-												? { ...it, title: e.target.value }
-												: it,
-										),
-									);
-								}}
-							/>
-							<Input
-								placeholder="Start Date"
-								value={item.startDate ?? ""}
-								onChange={(e) => {
-									setExperience((prev) =>
-										prev.map((it) =>
-											it.__id === item.__id
-												? { ...it, startDate: e.target.value }
-												: it,
-										),
-									);
-								}}
-							/>
-							<Input
-								placeholder="End Date"
-								value={item.endDate ?? ""}
-								onChange={(e) => {
-									setExperience((prev) =>
-										prev.map((it) =>
-											it.__id === item.__id
-												? { ...it, endDate: e.target.value }
-												: it,
-										),
-									);
-								}}
-							/>
-							<Textarea
-								placeholder="Summary"
-								value={item.summary ?? ""}
-								onChange={(e) => {
-									setExperience((prev) =>
-										prev.map((it) =>
-											it.__id === item.__id
-												? { ...it, summary: e.target.value }
-												: it,
-										),
-									);
-								}}
-							/>
-							<Input
-								placeholder="Location"
-								value={item.location ?? ""}
-								onChange={(e) => {
-									setExperience((prev) =>
-										prev.map((it) =>
-											it.__id === item.__id
-												? { ...it, location: e.target.value }
-												: it,
-										),
-									);
-								}}
-							/>
+						<div key={item.__id} className="space-y-3 border rounded p-3">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+								<div>
+									<label
+										htmlFor={`exp-company-${item.__id}`}
+										className="text-sm text-muted-foreground"
+									>
+										Company Name
+									</label>
+									<Input
+										id={`exp-company-${item.__id}`}
+										placeholder="Company Name"
+										value={item.company ?? ""}
+										onChange={(e) => {
+											setExperience((prev) =>
+												prev.map((it) =>
+													it.__id === item.__id
+														? { ...it, company: e.target.value }
+														: it,
+												),
+											);
+										}}
+									/>
+								</div>
+								<div>
+									<label
+										htmlFor={`exp-location-${item.__id}`}
+										className="text-sm text-muted-foreground"
+									>
+										Location
+									</label>
+									<Input
+										id={`exp-location-${item.__id}`}
+										placeholder="Location"
+										value={item.location ?? ""}
+										onChange={(e) => {
+											setExperience((prev) =>
+												prev.map((it) =>
+													it.__id === item.__id
+														? { ...it, location: e.target.value }
+														: it,
+												),
+											);
+										}}
+									/>
+								</div>
+							</div>
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+								<div>
+									<label
+										htmlFor={`exp-start-${item.__id}`}
+										className="text-sm text-muted-foreground"
+									>
+										Start
+									</label>
+									<Input
+										id={`exp-start-${item.__id}`}
+										placeholder="Start"
+										value={item.startDate ?? ""}
+										onChange={(e) => {
+											setExperience((prev) =>
+												prev.map((it) =>
+													it.__id === item.__id
+														? { ...it, startDate: e.target.value }
+														: it,
+												),
+											);
+										}}
+									/>
+								</div>
+								<div>
+									<label
+										htmlFor={`exp-end-${item.__id}`}
+										className="text-sm text-muted-foreground"
+									>
+										End
+									</label>
+									<Input
+										id={`exp-end-${item.__id}`}
+										placeholder="End"
+										value={item.endDate ?? ""}
+										onChange={(e) => {
+											setExperience((prev) =>
+												prev.map((it) =>
+													it.__id === item.__id
+														? { ...it, endDate: e.target.value }
+														: it,
+												),
+											);
+										}}
+									/>
+								</div>
+							</div>
+							<div>
+								<label
+									htmlFor={`exp-summary-${item.__id}`}
+									className="text-sm text-muted-foreground"
+								>
+									Summary
+								</label>
+								<Textarea
+									id={`exp-summary-${item.__id}`}
+									placeholder="Summary"
+									value={item.summary ?? ""}
+									onChange={(e) => {
+										setExperience((prev) =>
+											prev.map((it) =>
+												it.__id === item.__id
+													? { ...it, summary: e.target.value }
+													: it,
+											),
+										);
+									}}
+								/>
+							</div>
 							<Button
 								type="button"
 								variant="destructive"
@@ -483,57 +573,81 @@ function ApplyPage() {
 				</Button>
 				<div className="space-y-3">
 					{projects.map((item) => (
-						<div
-							key={item.__id}
-							className="grid grid-cols-1 sm:grid-cols-2 gap-2 border rounded p-3"
-						>
-							<Input
-								placeholder="Name"
-								value={item.name ?? ""}
-								onChange={(e) => {
-									setProjects((prev) =>
-										prev.map((it) =>
-											it.__id === item.__id
-												? { ...it, name: e.target.value }
-												: it,
-										),
-									);
-								}}
-							/>
-							<Textarea
-								placeholder="Description"
-								value={item.description ?? ""}
-								onChange={(e) => {
-									setProjects((prev) =>
-										prev.map((it) =>
-											it.__id === item.__id
-												? { ...it, description: e.target.value }
-												: it,
-										),
-									);
-								}}
-							/>
-							<Input
-								placeholder="Technologies (comma separated)"
-								value={
-									Array.isArray(item.technologies)
-										? item.technologies.join(", ")
-										: ""
-								}
-								onChange={(e) => {
-									const techs = e.target.value
-										.split(",")
-										.map((s) => s.trim())
-										.filter(Boolean);
-									setProjects((prev) =>
-										prev.map((it) =>
-											it.__id === item.__id
-												? { ...it, technologies: techs }
-												: it,
-										),
-									);
-								}}
-							/>
+						<div key={item.__id} className="space-y-3 border rounded p-3">
+							<div>
+								<label
+									htmlFor={`project-name-${item.__id}`}
+									className="text-sm text-muted-foreground"
+								>
+									Project Name
+								</label>
+								<Input
+									id={`project-name-${item.__id}`}
+									placeholder="Project Name"
+									value={item.name ?? ""}
+									onChange={(e) => {
+										setProjects((prev) =>
+											prev.map((it) =>
+												it.__id === item.__id
+													? { ...it, name: e.target.value }
+													: it,
+											),
+										);
+									}}
+								/>
+							</div>
+							<div>
+								<label
+									htmlFor={`project-description-${item.__id}`}
+									className="text-sm text-muted-foreground"
+								>
+									Description
+								</label>
+								<Textarea
+									id={`project-description-${item.__id}`}
+									placeholder="Description"
+									value={item.description ?? ""}
+									onChange={(e) => {
+										setProjects((prev) =>
+											prev.map((it) =>
+												it.__id === item.__id
+													? { ...it, description: e.target.value }
+													: it,
+											),
+										);
+									}}
+								/>
+							</div>
+							<div>
+								<label
+									htmlFor={`project-technologies-${item.__id}`}
+									className="text-sm text-muted-foreground"
+								>
+									Technologies
+								</label>
+								<Input
+									id={`project-technologies-${item.__id}`}
+									placeholder="Technologies (comma separated)"
+									value={
+										Array.isArray(item.technologies)
+											? item.technologies.join(", ")
+											: ""
+									}
+									onChange={(e) => {
+										const techs = e.target.value
+											.split(",")
+											.map((s) => s.trim())
+											.filter(Boolean);
+										setProjects((prev) =>
+											prev.map((it) =>
+												it.__id === item.__id
+													? { ...it, technologies: techs }
+													: it,
+											),
+										);
+									}}
+								/>
+							</div>
 							<Button
 								type="button"
 								variant="destructive"
