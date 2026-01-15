@@ -120,6 +120,12 @@ export const submitInviteApplication = t.procedure
 		if (invite.expiresAt && invite.expiresAt.getTime() < Date.now()) {
 			throw new TRPCError({ code: "UNAUTHORIZED", message: "Invite expired" });
 		}
+		if (invite.usedAt) {
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "Application has already been submitted",
+			});
+		}
 
 		// Update resume profile fields
 		const updateData: Record<string, unknown> = {};

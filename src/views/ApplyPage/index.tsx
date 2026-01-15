@@ -1,8 +1,8 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
 	Card,
@@ -157,8 +157,9 @@ export function ApplyPage({ jobId, code }: ApplyPageProps) {
 
 	const resume = inviteQ.data?.resume;
 	const questions = resume?.questionAnswers ?? [];
+	const isAlreadySubmitted = inviteQ.data?.usedAt !== null && inviteQ.data?.usedAt !== undefined;
 
-	if (isSubmitted) {
+	if (isSubmitted || isAlreadySubmitted) {
 		return (
 			<div className="flex flex-col h-screen">
 				<header className="fixed top-0 left-0 right-0 z-50 bg-background border-b">

@@ -13,7 +13,7 @@ export const getInviteData = t.procedure
 	.query(async ({ input }) => {
 		const invite = await prismaClient.invite.findUnique({
 			where: { code: input.code },
-			select: { id: true, jobId: true, resumeId: true, expiresAt: true },
+			select: { id: true, jobId: true, resumeId: true, expiresAt: true, usedAt: true },
 		});
 		if (!invite) {
 			throw new TRPCError({
@@ -83,6 +83,7 @@ export const getInviteData = t.procedure
 
 		return {
 			inviteCode: input.code,
+			usedAt: invite.usedAt,
 			resume: {
 				...resume,
 				education: validatedEducation,
