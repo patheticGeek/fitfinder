@@ -141,8 +141,9 @@ function JobsPage() {
 										</div>
 										<div className="flex items-center gap-2 shrink-0">
 											<Link
-												to="/app/organization/$orgId/job/$jobId/candidates"
-												params={{ orgId, jobId: j.id }}
+												to="/app/organization/$orgId/candidates"
+												params={{ orgId }}
+												search={{ jobId: j.id }}
 											>
 												<Button size="sm" variant="outline">
 													Candidates

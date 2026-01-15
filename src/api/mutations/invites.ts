@@ -117,16 +117,29 @@ export const submitInviteApplication = t.procedure
 		}
 
 		// Update resume profile fields
-		await prismaClient.resume.update({
-			where: { id: invite.resumeId },
-			data: {
-				email: input.email ?? undefined,
-				phone: input.phone ?? undefined,
-				education: input.education ?? undefined,
-				experience: input.experience ?? undefined,
-				projects: input.projects ?? undefined,
-			},
-		});
+		const updateData: Record<string, unknown> = {};
+		if (input.email !== undefined && input.email !== "") {
+			updateData.email = input.email;
+		}
+		if (input.phone !== undefined && input.phone !== "") {
+			updateData.phone = input.phone;
+		}
+		if (input.education !== undefined) {
+			updateData.education = input.education;
+		}
+		if (input.experience !== undefined) {
+			updateData.experience = input.experience;
+		}
+		if (input.projects !== undefined) {
+			updateData.projects = input.projects;
+		}
+
+		if (Object.keys(updateData).length > 0) {
+			await prismaClient.resume.update({
+				where: { id: invite.resumeId },
+				data: updateData,
+			});
+		}
 
 		// Upsert skills
 		if (input.skills && input.skills.length > 0) {
