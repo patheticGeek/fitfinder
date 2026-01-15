@@ -43,13 +43,18 @@ export const getInviteData = t.procedure
 				resumeSkills: {
 					select: { id: true, skill: { select: { name: true } } },
 				},
-				questionAnswers: { select: { id: true, question: true, answer: true } },
+				questionAnswers: { select: { id: true, question: true } },
 				job: {
 					select: {
 						id: true,
 						title: true,
 						suggestedQuestions: true,
 						description: true,
+						organization: {
+							select: {
+								name: true,
+							},
+						},
 					},
 				},
 			},
