@@ -1,24 +1,27 @@
 import { z } from "zod";
 
 export const educationSchema = z.object({
-	school: z.string().min(1),
-	degree: z.string().min(1),
-	field: z.string().min(1),
-	graduated: z.string().optional(),
+	institution: z.string(),
+	degree: z.string().optional(),
+	field: z.string().optional(),
+	startDate: z.string().optional(),
+	endDate: z.string().optional(),
+	location: z.string().optional(),
 });
 
 export const experienceSchema = z.object({
-	company: z.string().min(1),
-	role: z.string().min(1),
-	description: z.string().optional(),
-	startDate: z.string().min(1), // prefer YYYY-MM or ISO-8601
+	company: z.string(),
+	title: z.string().optional(),
+	startDate: z.string().optional(),
 	endDate: z.string().optional(),
+	summary: z.string().optional(),
+	location: z.string().optional(),
 });
 
 export const projectSchema = z.object({
-	name: z.string().min(1),
-	description: z.string().min(1),
-	link: z.string().url().optional(),
+	name: z.string(),
+	description: z.string().optional(),
+	technologies: z.array(z.string()).optional(),
 });
 
 export const skillItemSchema = z.object({

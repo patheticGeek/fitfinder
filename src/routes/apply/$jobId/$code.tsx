@@ -4,9 +4,17 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useMatch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
+import {
+	Card,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
+import { Spinner } from "~/components/ui/spinner";
 import { Textarea } from "~/components/ui/textarea";
 import type { AppRouterInputs } from "~/routes/api/trpc/$";
+import type { Education, Experience, Project } from "~/schemas/resume";
 import { useGlobalContext } from "~/utils/hooks";
 
 export const Route = createFileRoute("/apply/$jobId/$code")({
@@ -15,16 +23,7 @@ export const Route = createFileRoute("/apply/$jobId/$code")({
 
 type SubmitInput = AppRouterInputs["submitInviteApplication"];
 
-// Use Record<string, unknown> for JSON fields from Prisma/tRPC
-type EducationEntry = Record<string, unknown>;
-type ExperienceEntry = Record<string, unknown>;
-type ProjectEntry = Record<string, unknown>;
-
 type WithId<T> = T & { __id: string };
-
-// Helper to safely get string value from Record
-const getString = (obj: Record<string, unknown>, key: string): string =>
-	String(obj[key] ?? "");
 
 function ApplyPage() {
 	const { trpc } = useGlobalContext();
@@ -40,9 +39,9 @@ function ApplyPage() {
 	const [phone, setPhone] = useState("");
 	const [skills, setSkills] = useState<string[]>([]);
 	const [newSkill, setNewSkill] = useState("");
-	const [education, setEducation] = useState<WithId<EducationEntry>[]>([]);
-	const [experience, setExperience] = useState<WithId<ExperienceEntry>[]>([]);
-	const [projects, setProjects] = useState<WithId<ProjectEntry>[]>([]);
+	const [education, setEducation] = useState<WithId<Education>[]>([]);
+	const [experience, setExperience] = useState<WithId<Experience>[]>([]);
+	const [projects, setProjects] = useState<WithId<Project>[]>([]);
 	const [answers, setAnswers] = useState<
 		NonNullable<SubmitInput["answers"]>[number][]
 	>([]);
@@ -56,31 +55,29 @@ function ApplyPage() {
 		setPhone(resume.phone ?? "");
 
 		const educationData = Array.isArray(resume.education)
-			? (resume.education as EducationEntry[])
+			? resume.education
 			: [];
 		setEducation(
 			educationData.map((e) => ({
-				...(e || {}),
+				...e,
 				__id: crypto.randomUUID(),
 			})),
 		);
 
 		const experienceData = Array.isArray(resume.experience)
-			? (resume.experience as ExperienceEntry[])
+			? resume.experience
 			: [];
 		setExperience(
 			experienceData.map((e) => ({
-				...(e || {}),
+				...e,
 				__id: crypto.randomUUID(),
 			})),
 		);
 
-		const projectsData = Array.isArray(resume.projects)
-			? (resume.projects as ProjectEntry[])
-			: [];
+		const projectsData = Array.isArray(resume.projects) ? resume.projects : [];
 		setProjects(
 			projectsData.map((p) => ({
-				...(p || {}),
+				...p,
 				__id: crypto.randomUUID(),
 			})),
 		);
@@ -100,7 +97,7 @@ function ApplyPage() {
 	}, [inviteQ.data]);
 
 	const onSubmit = async () => {
-		const input: SubmitInput = {
+		await submitM.mutateAsync({
 			code,
 			jobId,
 			email: email || undefined,
@@ -110,18 +107,42 @@ function ApplyPage() {
 			projects: projects.map(({ __id, ...rest }) => rest),
 			skills,
 			answers: answers.filter((a) => a.answer && a.answer.trim().length > 0),
-		};
-		await submitM.mutateAsync(input);
+		});
 		alert("Application submitted successfully!");
 	};
 
 	if (inviteQ.isLoading) {
-		return <div className="p-6">Loading invitation...</div>;
+		return (
+			<div className="flex min-h-screen items-center justify-center p-6">
+				<Card className="w-full max-w-md">
+					<CardHeader className="text-center">
+						<div className="flex justify-center">
+							<Spinner className="size-8" />
+						</div>
+						<CardTitle className="mt-4">Loading invitation</CardTitle>
+						<CardDescription>
+							Please wait while we verify your invite code...
+						</CardDescription>
+					</CardHeader>
+				</Card>
+			</div>
+		);
 	}
 	if (inviteQ.isError) {
 		return (
-			<div className="p-6 text-red-500">
-				Failed to load invite. It may be invalid or expired.
+			<div className="flex min-h-screen items-center justify-center p-6">
+				<Card className="w-full max-w-md">
+					<CardHeader className="text-center">
+						<CardTitle className="text-destructive">
+							Failed to load invitation
+						</CardTitle>
+						<CardDescription className="mt-2">
+							{inviteQ.error instanceof Error
+								? inviteQ.error.message
+								: "The invite may be invalid or expired. Please check your invite code and try again."}
+						</CardDescription>
+					</CardHeader>
+				</Card>
 			</div>
 		);
 	}
@@ -209,7 +230,7 @@ function ApplyPage() {
 					type="button"
 					variant="outline"
 					onClick={() => {
-						const newEntry: WithId<EducationEntry> = {
+						const newEntry: WithId<Education> = {
 							institution: "",
 							degree: undefined,
 							field: undefined,
@@ -231,7 +252,7 @@ function ApplyPage() {
 						>
 							<Input
 								placeholder="Institution"
-								value={getString(item, "institution")}
+								value={item.institution ?? ""}
 								onChange={(e) => {
 									setEducation((prev) =>
 										prev.map((it) =>
@@ -244,7 +265,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="Degree"
-								value={getString(item, "degree")}
+								value={item.degree ?? ""}
 								onChange={(e) => {
 									setEducation((prev) =>
 										prev.map((it) =>
@@ -257,7 +278,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="Field"
-								value={getString(item, "field")}
+								value={item.field ?? ""}
 								onChange={(e) => {
 									setEducation((prev) =>
 										prev.map((it) =>
@@ -270,7 +291,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="Start Date"
-								value={getString(item, "startDate")}
+								value={item.startDate ?? ""}
 								onChange={(e) => {
 									setEducation((prev) =>
 										prev.map((it) =>
@@ -283,7 +304,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="End Date"
-								value={getString(item, "endDate")}
+								value={item.endDate ?? ""}
 								onChange={(e) => {
 									setEducation((prev) =>
 										prev.map((it) =>
@@ -296,7 +317,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="Location"
-								value={getString(item, "location")}
+								value={item.location ?? ""}
 								onChange={(e) => {
 									setEducation((prev) =>
 										prev.map((it) =>
@@ -329,7 +350,7 @@ function ApplyPage() {
 					type="button"
 					variant="outline"
 					onClick={() => {
-						const newEntry: WithId<ExperienceEntry> = {
+						const newEntry: WithId<Experience> = {
 							company: "",
 							title: undefined,
 							startDate: undefined,
@@ -351,7 +372,7 @@ function ApplyPage() {
 						>
 							<Input
 								placeholder="Company"
-								value={getString(item, "company")}
+								value={item.company ?? ""}
 								onChange={(e) => {
 									setExperience((prev) =>
 										prev.map((it) =>
@@ -364,7 +385,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="Title"
-								value={getString(item, "title")}
+								value={item.title ?? ""}
 								onChange={(e) => {
 									setExperience((prev) =>
 										prev.map((it) =>
@@ -377,7 +398,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="Start Date"
-								value={getString(item, "startDate")}
+								value={item.startDate ?? ""}
 								onChange={(e) => {
 									setExperience((prev) =>
 										prev.map((it) =>
@@ -390,7 +411,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="End Date"
-								value={getString(item, "endDate")}
+								value={item.endDate ?? ""}
 								onChange={(e) => {
 									setExperience((prev) =>
 										prev.map((it) =>
@@ -403,7 +424,7 @@ function ApplyPage() {
 							/>
 							<Textarea
 								placeholder="Summary"
-								value={getString(item, "summary")}
+								value={item.summary ?? ""}
 								onChange={(e) => {
 									setExperience((prev) =>
 										prev.map((it) =>
@@ -416,7 +437,7 @@ function ApplyPage() {
 							/>
 							<Input
 								placeholder="Location"
-								value={getString(item, "location")}
+								value={item.location ?? ""}
 								onChange={(e) => {
 									setExperience((prev) =>
 										prev.map((it) =>
@@ -449,7 +470,7 @@ function ApplyPage() {
 					type="button"
 					variant="outline"
 					onClick={() => {
-						const newEntry: WithId<ProjectEntry> = {
+						const newEntry: WithId<Project> = {
 							name: "",
 							description: undefined,
 							technologies: undefined,
@@ -468,7 +489,7 @@ function ApplyPage() {
 						>
 							<Input
 								placeholder="Name"
-								value={getString(item, "name")}
+								value={item.name ?? ""}
 								onChange={(e) => {
 									setProjects((prev) =>
 										prev.map((it) =>
@@ -481,7 +502,7 @@ function ApplyPage() {
 							/>
 							<Textarea
 								placeholder="Description"
-								value={getString(item, "description")}
+								value={item.description ?? ""}
 								onChange={(e) => {
 									setProjects((prev) =>
 										prev.map((it) =>

@@ -1,5 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import {
+	educationSchema,
+	experienceSchema,
+	projectSchema,
+} from "~/schemas/resume";
 import { prismaClient } from "~/utils/prisma";
 import { t } from "~/utils/trpcServer";
 
@@ -53,5 +58,31 @@ export const getInviteData = t.procedure
 			throw new TRPCError({ code: "NOT_FOUND", message: "Resume not found" });
 		}
 
-		return { inviteCode: input.code, resume };
+		// Validate and transform JSON fields
+		const educationParse = resume.education
+			? educationSchema.array().safeParse(resume.education)
+			: { success: true as const, data: [] };
+		const validatedEducation = educationParse.success ? educationParse.data : [];
+
+		const experienceParse = resume.experience
+			? experienceSchema.array().safeParse(resume.experience)
+			: { success: true as const, data: [] };
+		const validatedExperience = experienceParse.success
+			? experienceParse.data
+			: [];
+
+		const projectsParse = resume.projects
+			? projectSchema.array().safeParse(resume.projects)
+			: { success: true as const, data: [] };
+		const validatedProjects = projectsParse.success ? projectsParse.data : [];
+
+		return {
+			inviteCode: input.code,
+			resume: {
+				...resume,
+				education: validatedEducation,
+				experience: validatedExperience,
+				projects: validatedProjects,
+			},
+		};
 	});

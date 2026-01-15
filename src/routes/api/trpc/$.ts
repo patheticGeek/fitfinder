@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { resolveResponse } from "@trpc/server/http";
 import { applyResume } from "~/api/mutations/applyResume";
 import { login, signup } from "~/api/mutations/auth";
@@ -36,13 +37,14 @@ export const appRouter = t.router({
 	getOrganizationCandidates,
 	deleteJob,
 	deleteOrg,
-	// invites
 	createInvite,
 	getInviteData,
 	submitInviteApplication,
 });
 
 export type AppRouter = typeof appRouter;
+export type AppRouterInputs = inferRouterInputs<AppRouter>;
+export type AppRouterOutputs = inferRouterOutputs<AppRouter>;
 
 export const Route = createFileRoute("/api/trpc/$")({
 	server: {

@@ -1,5 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import {
+	educationSchema,
+	experienceSchema,
+	projectSchema,
+} from "~/schemas/resume";
 import { prismaClient } from "~/utils/prisma";
 import { authedProcedure, t } from "~/utils/trpcServer";
 
@@ -77,9 +82,9 @@ export const submitInviteApplication = t.procedure
 			// editable profile fields
 			email: z.string().email().optional(),
 			phone: z.string().optional(),
-			education: z.array(z.record(z.string(), z.any())).optional(),
-			experience: z.array(z.record(z.string(), z.any())).optional(),
-			projects: z.array(z.record(z.string(), z.any())).optional(),
+			education: z.array(educationSchema).optional(),
+			experience: z.array(experienceSchema).optional(),
+			projects: z.array(projectSchema).optional(),
 			// skills by names for simplicity
 			skills: z.array(z.string()).optional(),
 			// answers: array of { id, answer } for existing questions
