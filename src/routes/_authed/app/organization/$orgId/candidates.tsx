@@ -1,13 +1,19 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
 	createFileRoute,
 	useMatch,
 	useNavigate,
 	useSearch,
 } from "@tanstack/react-router";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import {
+	ArrowDown,
+	ArrowUp,
+	ArrowUpDown,
+	CheckCircle,
+	Copy,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
@@ -56,6 +62,62 @@ type CandidateRow = {
 	addedByUser?: { email?: string } | null;
 	job?: { title?: string; id?: string } | null;
 };
+
+// InviteLinkSection Component
+function InviteLinkSection({
+	resumeId,
+	jobId,
+}: {
+	resumeId: string;
+	jobId: string;
+}) {
+	const { trpc } = useGlobalContext();
+	const [copiedCode, setCopiedCode] = useState<string | null>(null);
+	const createInviteM = useMutation(trpc.createInvite.mutationOptions());
+
+	const handleCreateInvite = async () => {
+		const result = await createInviteM.mutateAsync({ resumeId, jobId });
+		setCopiedCode(result.code);
+		const origin =
+			typeof window !== "undefined" && window.location.origin
+				? window.location.origin
+				: "";
+		const inviteUrl = `${origin}/apply/${jobId}/${result.code}`;
+		navigator.clipboard.writeText(inviteUrl);
+		setTimeout(() => setCopiedCode(null), 2000);
+	};
+
+	return (
+		<div className="border rounded-lg p-4 bg-muted/30">
+			<div className="text-lg font-semibold mb-3">
+				Generate Candidate Invite
+			</div>
+			<p className="text-sm text-muted-foreground mb-4">
+				Create a unique invite link for this candidate to fill out and answer
+				interview questions without logging in.
+			</p>
+			<Button
+				onClick={handleCreateInvite}
+				disabled={createInviteM.isPending || copiedCode !== null}
+				className="gap-2"
+			>
+				{copiedCode ? (
+					<>
+						<CheckCircle className="h-4 w-4" />
+						Link Copied!
+					</>
+				) : (
+					<>
+						<Copy className="h-4 w-4" />
+						{createInviteM.isPending
+							? "Creating..."
+							: "Create & Copy Invite Link"}
+					</>
+				)}
+			</Button>
+		</div>
+	);
+}
 
 // UI Components for structured data
 
@@ -688,6 +750,14 @@ function CandidatesPage() {
 										</div>
 									</div>
 								)}
+
+							{/* Invite Link Section */}
+							{selectedCandidate?.job?.id && (
+								<InviteLinkSection
+									resumeId={selectedCandidate.id}
+									jobId={selectedCandidate.job.id}
+								/>
+							)}
 						</div>
 					)}
 				</DialogContent>

@@ -55,6 +55,7 @@ model Job {
   organization           Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId         String
   resumes                Resume[]
+  invites                Invite[]
   additionalInstructions String?
   suggestedQuestions     String?
   createdAt              DateTime     @default(now())
@@ -89,6 +90,7 @@ model Resume {
 
   // Normalized skills linkage
   resumeSkills ResumeSkill[]
+  invites      Invite[]
   createdAt    DateTime      @default(now())
 }
 
@@ -117,4 +119,16 @@ model ResumeSkill {
   skillId  String
 
   @@unique([resumeId, skillId])
+}
+
+model Invite {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  job       Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId     String
+  resume    Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  resumeId  String
+  expiresAt DateTime?
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 }
