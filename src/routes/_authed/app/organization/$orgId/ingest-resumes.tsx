@@ -44,7 +44,7 @@ function IngestResumesPage() {
 		select: (s) => s.params.orgId,
 	});
 
-	const mutation = useMutation(trpc.apply.mutationOptions());
+	const applyM = useMutation(trpc.apply.mutationOptions());
 
 	const jobsQuery = useQuery(trpc.listJobs.queryOptions());
 
@@ -101,7 +101,7 @@ function IngestResumesPage() {
 				const contentBase64 = base64.replace(/^data:.*;base64,/, "");
 
 				try {
-					await mutation.mutateAsync({
+					await applyM.mutateAsync({
 						fileName: file.name,
 						mimeType: file.type,
 						contentBase64,

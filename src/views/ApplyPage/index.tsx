@@ -41,7 +41,9 @@ export function ApplyPage({ jobId, code }: ApplyPageProps) {
 	const applicationQuery = useQuery(
 		trpc.getApplicationDetails.queryOptions({ jobId, code }),
 	);
-	const submitM = useMutation(trpc.submitApplication.mutationOptions());
+	const submitApplicationM = useMutation(
+		trpc.submitApplication.mutationOptions(),
+	);
 
 	const [currentStep, setCurrentStep] = useState(0);
 	const [isSubmitted, setIsSubmitted] = useState(false);
@@ -107,7 +109,7 @@ export function ApplyPage({ jobId, code }: ApplyPageProps) {
 	}, [applicationQuery.data]);
 
 	const onSubmit = async () => {
-		await submitM.mutateAsync({
+		await submitApplicationM.mutateAsync({
 			code,
 			jobId,
 			email: email || undefined,
@@ -359,9 +361,11 @@ export function ApplyPage({ jobId, code }: ApplyPageProps) {
 								<Button
 									type="button"
 									onClick={onSubmit}
-									disabled={submitM.isPending}
+									disabled={submitApplicationM.isPending}
 								>
-									{submitM.isPending ? "Submitting..." : "Submit Application"}
+									{submitApplicationM.isPending
+										? "Submitting..."
+										: "Submit Application"}
 								</Button>
 							)}
 						</div>

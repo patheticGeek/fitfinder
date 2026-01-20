@@ -73,12 +73,12 @@ function InviteLinkSection({
 }) {
 	const { trpc } = useGlobalContext();
 	const [copiedCode, setCopiedCode] = useState<string | null>(null);
-	const createInviteM = useMutation(
+	const createApplicationInviteM = useMutation(
 		trpc.createApplicationInvite.mutationOptions(),
 	);
 
-	const handleCreateInvite = async () => {
-		const result = await createInviteM.mutateAsync({ resumeId, jobId });
+	const handleCreateApplicationInvite = async () => {
+		const result = await createApplicationInviteM.mutateAsync({ resumeId, jobId });
 		setCopiedCode(result.code);
 		const origin =
 			typeof window !== "undefined" && window.location.origin
@@ -99,8 +99,8 @@ function InviteLinkSection({
 				interview questions without logging in.
 			</p>
 			<Button
-				onClick={handleCreateInvite}
-				disabled={createInviteM.isPending || copiedCode !== null}
+				onClick={handleCreateApplicationInvite}
+				disabled={createApplicationInviteM.isPending || copiedCode !== null}
 				className="gap-2"
 			>
 				{copiedCode ? (
@@ -111,7 +111,7 @@ function InviteLinkSection({
 				) : (
 					<>
 						<Copy className="h-4 w-4" />
-						{createInviteM.isPending
+						{createApplicationInviteM.isPending
 							? "Creating..."
 							: "Create & Copy Invite Link"}
 					</>
