@@ -8,7 +8,7 @@ import {
 import { prismaClient } from "~/utils/prisma";
 import { authedProcedure, t } from "~/utils/trpcServer";
 
-export const createInvite = authedProcedure
+export const createApplicationInvite = authedProcedure
 	.input(
 		z.object({
 			resumeId: z.string().min(1),
@@ -74,7 +74,7 @@ export const createInvite = authedProcedure
 		};
 	});
 
-export const submitInviteApplication = t.procedure
+export const submitApplication = t.procedure
 	.input(
 		z.object({
 			code: z.string().min(6),

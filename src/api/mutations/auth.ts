@@ -88,8 +88,3 @@ export const signup = t.procedure
 
 		return { success: true };
 	});
-
-export const logout = t.procedure.mutation(async ({ ctx }) => {
-	ctx.session.clear();
-	return { success: true };
-});

@@ -8,12 +8,18 @@ import {
 import { prismaClient } from "~/utils/prisma";
 import { t } from "~/utils/trpcServer";
 
-export const getInviteData = t.procedure
+export const getApplicationDetails = t.procedure
 	.input(z.object({ code: z.string().min(6), jobId: z.string().min(1) }))
 	.query(async ({ input }) => {
 		const invite = await prismaClient.invite.findUnique({
 			where: { code: input.code },
-			select: { id: true, jobId: true, resumeId: true, expiresAt: true, usedAt: true },
+			select: {
+				id: true,
+				jobId: true,
+				resumeId: true,
+				expiresAt: true,
+				usedAt: true,
+			},
 		});
 		if (!invite) {
 			throw new TRPCError({
@@ -67,7 +73,9 @@ export const getInviteData = t.procedure
 		const educationParse = resume.education
 			? educationSchema.array().safeParse(resume.education)
 			: { success: true as const, data: [] };
-		const validatedEducation = educationParse.success ? educationParse.data : [];
+		const validatedEducation = educationParse.success
+			? educationParse.data
+			: [];
 
 		const experienceParse = resume.experience
 			? experienceSchema.array().safeParse(resume.experience)

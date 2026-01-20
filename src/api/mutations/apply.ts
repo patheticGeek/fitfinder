@@ -4,6 +4,13 @@ import pdfParse from "pdf-parse";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import type { Resume } from "~/prisma-generated/client";
+import {
+	educationSchema,
+	experienceSchema,
+	interviewQuestionSchema,
+	projectSchema,
+	skillSchema,
+} from "~/schemas/resume";
 import { prismaClient } from "~/utils/prisma";
 import { authedProcedure } from "~/utils/trpcServer";
 
@@ -15,61 +22,19 @@ const ApplySchema = z.object({
 	orgId: z.string().optional(),
 });
 
-export const InterviewQuestionSchema = z.object({
-	text: z.string(),
-	topic: z.string().optional(),
-	confidence: z.number().min(0).max(1).optional(),
-	correctAnswer: z.string().optional(),
-});
-
-export const EducationSchema = z.object({
-	institution: z.string(),
-	degree: z.string().optional(),
-	field: z.string().optional(),
-	startDate: z.string().optional(),
-	endDate: z.string().optional(),
-	location: z.string().optional(),
-});
-
-export const ExperienceSchema = z.object({
-	company: z.string(),
-	title: z.string().optional(),
-	startDate: z.string().optional(),
-	endDate: z.string().optional(),
-	summary: z.string().optional(),
-	location: z.string().optional(),
-});
-
-export const ProjectSchema = z.object({
-	name: z.string(),
-	description: z.string().optional(),
-	technologies: z.array(z.string()).optional(),
-});
-
-export const SkillSchema = z.object({
-	name: z.string(),
-	level: z.enum(["beginner", "intermediate", "expert"]).optional(),
-});
-
 const GeminiStructuredSchema = z.object({
 	score: z.number().min(0).max(100),
 	scoreJustification: z.string(),
-	interviewQuestions: z.array(InterviewQuestionSchema).optional(),
-	education: z.array(EducationSchema).optional(),
-	experience: z.array(ExperienceSchema).optional(),
-	projects: z.array(ProjectSchema).optional(),
-	skills: z.array(SkillSchema).optional(),
+	interviewQuestions: z.array(interviewQuestionSchema).optional(),
+	education: z.array(educationSchema).optional(),
+	experience: z.array(experienceSchema).optional(),
+	projects: z.array(projectSchema).optional(),
+	skills: z.array(skillSchema).optional(),
 	currentLocation: z.string().optional(),
 	totalExperienceMonths: z.number().int().min(0).optional(),
 	email: z.string().email().optional(),
 	phone: z.string().optional(),
 });
-
-export type InterviewQuestion = z.infer<typeof InterviewQuestionSchema>;
-export type Education = z.infer<typeof EducationSchema>;
-export type Experience = z.infer<typeof ExperienceSchema>;
-export type Project = z.infer<typeof ProjectSchema>;
-export type Skill = z.infer<typeof SkillSchema>;
 
 async function generateMatchAndQuestionsWithGemini(
 	resumeText: string,
@@ -104,6 +69,8 @@ async function generateMatchAndQuestionsWithGemini(
 	- totalExperienceMonths (optional integer)
 	- email (optional, extracted candidate email address)
 	- phone (optional, extracted candidate phone number)
+
+	Make sure dates are in the format YYYY-MM-DD and are valid dates. If no day give, use the first day of the month.
 
 	<resume>\n${resumeText}\n</resume>
 	<job-description>\n${jobDescription}\n</job-description>
@@ -157,7 +124,7 @@ async function generateMatchAndQuestionsWithGemini(
 	}
 }
 
-export const applyResume = authedProcedure
+export const apply = authedProcedure
 	.input(ApplySchema)
 	.mutation(async ({ ctx, input }) => {
 		try {

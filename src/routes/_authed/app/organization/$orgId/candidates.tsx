@@ -73,7 +73,9 @@ function InviteLinkSection({
 }) {
 	const { trpc } = useGlobalContext();
 	const [copiedCode, setCopiedCode] = useState<string | null>(null);
-	const createInviteM = useMutation(trpc.createInvite.mutationOptions());
+	const createInviteM = useMutation(
+		trpc.createApplicationInvite.mutationOptions(),
+	);
 
 	const handleCreateInvite = async () => {
 		const result = await createInviteM.mutateAsync({ resumeId, jobId });

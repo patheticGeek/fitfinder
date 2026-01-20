@@ -1,15 +1,11 @@
 import type { Resume } from "../prisma-generated/client";
 import {
-	educationSchema,
-	experienceSchema,
-	projectSchema,
-	resumeJSONSchema,
-	skillItemSchema,
 	type Education,
+	educationSchema,
 	type Experience,
+	experienceSchema,
 	type Project,
-	type ResumeJSON,
-	type SkillItem,
+	projectSchema,
 } from "../schemas/resume";
 
 export function parseEducation(resume: Resume): Education[] {
@@ -30,31 +26,11 @@ export function parseProjects(resume: Resume): Project[] {
 	return parsed.success ? parsed.data : [];
 }
 
-export function parseSkills(resume: Resume): SkillItem[] {
-	type ResumeWithSkills = Resume & { skills?: unknown };
-	const skills = (resume as ResumeWithSkills).skills;
-	if (!skills) return [];
-	const parsed = skillItemSchema.array().safeParse(skills);
-	return parsed.success ? parsed.data : [];
-}
-
-export function parseResumeJSON(resume: Resume): ResumeJSON {
-	const obj: Record<string, unknown> = {
-		education: resume.education ?? undefined,
-		experience: resume.experience ?? undefined,
-		projects: resume.projects ?? undefined,
-	};
-	const parsed = resumeJSONSchema.safeParse(obj);
-	return parsed.success ? parsed.data : {};
-}
-
 export function validateEducation(data: Education[]): Education[] {
 	return educationSchema.array().parse(data);
 }
 
-export function validateExperience(
-	data: Experience[],
-): Experience[] {
+export function validateExperience(data: Experience[]): Experience[] {
 	return experienceSchema.array().parse(data);
 }
 
@@ -62,15 +38,10 @@ export function validateProjects(data: Project[]): Project[] {
 	return projectSchema.array().parse(data);
 }
 
-export function validateSkills(data: SkillItem[]): SkillItem[] {
-	return skillItemSchema.array().parse(data);
-}
-
 // Utility to compute total months of experience from entries
-export function computeTotalExperienceMonths(
-	entries: Experience[],
-): number {
-	const toMonthIndex = (d: string): number => {
+export function computeTotalExperienceMonths(entries: Experience[]): number {
+	const toMonthIndex = (d: string | undefined): number => {
+		if (!d) return 0;
 		const date = new Date(d);
 		if (Number.isNaN(date.getTime())) return 0;
 		return date.getUTCFullYear() * 12 + date.getUTCMonth();
