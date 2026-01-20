@@ -44,7 +44,7 @@ function IngestResumesPage() {
 		select: (s) => s.params.orgId,
 	});
 
-	const mutation = useMutation(trpc.applyResume.mutationOptions());
+	const mutation = useMutation(trpc.apply.mutationOptions());
 
 	const jobsQuery = useQuery(trpc.listJobs.queryOptions());
 

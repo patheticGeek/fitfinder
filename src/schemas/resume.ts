@@ -1,19 +1,23 @@
 import { z } from "zod";
 
+const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+	message: "Date must be in YYYY-MM-DD format",
+});
+
 export const educationSchema = z.object({
 	institution: z.string(),
 	degree: z.string().optional(),
 	field: z.string().optional(),
-	startDate: z.string().optional(),
-	endDate: z.string().optional(),
+	startDate: dateSchema.optional(),
+	endDate: dateSchema.optional(),
 	location: z.string().optional(),
 });
 
 export const experienceSchema = z.object({
 	company: z.string(),
 	title: z.string().optional(),
-	startDate: z.string().optional(),
-	endDate: z.string().optional(),
+	startDate: dateSchema.optional(),
+	endDate: dateSchema.optional(),
 	summary: z.string().optional(),
 	location: z.string().optional(),
 });
@@ -24,26 +28,20 @@ export const projectSchema = z.object({
 	technologies: z.array(z.string()).optional(),
 });
 
-export const skillItemSchema = z.object({
-	name: z.string().min(1),
-	level: z.enum(["beginner", "intermediate", "expert"]),
+export const interviewQuestionSchema = z.object({
+	text: z.string(),
+	topic: z.string().optional(),
+	confidence: z.number().min(0).max(1).optional(),
+	correctAnswer: z.string().optional(),
 });
 
-export const interviewQuestionItemSchema = z.object({
-	id: z.string().min(1),
-	question: z.string().min(1),
-	order: z.number().optional(),
-});
-
-export const resumeJSONSchema = z.object({
-	education: educationSchema.array().optional(),
-	experience: experienceSchema.array().optional(),
-	projects: projectSchema.array().optional(),
+export const skillSchema = z.object({
+	name: z.string(),
+	level: z.enum(["beginner", "intermediate", "expert"]).optional(),
 });
 
 export type Education = z.infer<typeof educationSchema>;
 export type Experience = z.infer<typeof experienceSchema>;
 export type Project = z.infer<typeof projectSchema>;
-export type SkillItem = z.infer<typeof skillItemSchema>;
-export type InterviewQuestionItem = z.infer<typeof interviewQuestionItemSchema>;
-export type ResumeJSON = z.infer<typeof resumeJSONSchema>;
+export type InterviewQuestion = z.infer<typeof interviewQuestionSchema>;
+export type Skill = z.infer<typeof skillSchema>;

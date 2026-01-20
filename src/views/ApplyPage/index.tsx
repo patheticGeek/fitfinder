@@ -26,7 +26,7 @@ import { useGlobalContext } from "~/utils/hooks";
 import { Details } from "./components/Details";
 import { Questions } from "./components/Questions";
 
-type SubmitInput = AppRouterInputs["submitInviteApplication"];
+type SubmitInput = AppRouterInputs["submitApplication"];
 
 type WithId<T> = T & { __id: string };
 
@@ -38,8 +38,10 @@ interface ApplyPageProps {
 export function ApplyPage({ jobId, code }: ApplyPageProps) {
 	const { trpc } = useGlobalContext();
 
-	const inviteQ = useQuery(trpc.getInviteData.queryOptions({ jobId, code }));
-	const submitM = useMutation(trpc.submitInviteApplication.mutationOptions());
+	const applicationQuery = useQuery(
+		trpc.getApplicationDetails.queryOptions({ jobId, code }),
+	);
+	const submitM = useMutation(trpc.submitApplication.mutationOptions());
 
 	const [currentStep, setCurrentStep] = useState(0);
 	const [isSubmitted, setIsSubmitted] = useState(false);
@@ -56,7 +58,7 @@ export function ApplyPage({ jobId, code }: ApplyPageProps) {
 
 	// Initialize state when data loads
 	useEffect(() => {
-		const resume = inviteQ.data?.resume;
+		const resume = applicationQuery.data?.resume;
 		if (!resume) return;
 
 		setEmail(resume.email ?? "");
@@ -102,7 +104,7 @@ export function ApplyPage({ jobId, code }: ApplyPageProps) {
 				answer: "",
 			})),
 		);
-	}, [inviteQ.data]);
+	}, [applicationQuery.data]);
 
 	const onSubmit = async () => {
 		await submitM.mutateAsync({
@@ -119,7 +121,7 @@ export function ApplyPage({ jobId, code }: ApplyPageProps) {
 		setIsSubmitted(true);
 	};
 
-	if (inviteQ.isLoading) {
+	if (applicationQuery.isLoading) {
 		return (
 			<div className="flex min-h-screen items-center justify-center p-6">
 				<Card className="w-full max-w-md">
@@ -136,7 +138,7 @@ export function ApplyPage({ jobId, code }: ApplyPageProps) {
 			</div>
 		);
 	}
-	if (inviteQ.isError) {
+	if (applicationQuery.isError) {
 		return (
 			<div className="flex min-h-screen items-center justify-center p-6">
 				<Card className="w-full max-w-md">
@@ -145,8 +147,8 @@ export function ApplyPage({ jobId, code }: ApplyPageProps) {
 							Failed to load invitation
 						</CardTitle>
 						<CardDescription className="mt-2">
-							{inviteQ.error instanceof Error
-								? inviteQ.error.message
+							{applicationQuery.error instanceof Error
+								? applicationQuery.error.message
 								: "The invite may be invalid or expired. Please check your invite code and try again."}
 						</CardDescription>
 					</CardHeader>
@@ -155,9 +157,11 @@ export function ApplyPage({ jobId, code }: ApplyPageProps) {
 		);
 	}
 
-	const resume = inviteQ.data?.resume;
+	const resume = applicationQuery.data?.resume;
 	const questions = resume?.questionAnswers ?? [];
-	const isAlreadySubmitted = inviteQ.data?.usedAt !== null && inviteQ.data?.usedAt !== undefined;
+	const isAlreadySubmitted =
+		applicationQuery.data?.usedAt !== null &&
+		applicationQuery.data?.usedAt !== undefined;
 
 	if (isSubmitted || isAlreadySubmitted) {
 		return (
