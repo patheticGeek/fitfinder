@@ -124,7 +124,7 @@ async function generateMatchAndQuestionsWithGemini(
 	}
 }
 
-export const apply = authedProcedure
+export const submitResume = authedProcedure
 	.input(ApplySchema)
 	.mutation(async ({ ctx, input }) => {
 		try {

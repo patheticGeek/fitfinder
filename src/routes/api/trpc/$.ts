@@ -5,7 +5,7 @@ import {
 	createApplicationInvite,
 	submitApplication,
 } from "~/api/mutations/application";
-import { apply } from "~/api/mutations/apply";
+import { submitResume } from "~/api/mutations/apply";
 import { login, signup } from "~/api/mutations/auth";
 import { createJob, deleteJob, updateJob } from "~/api/mutations/jobs";
 import {
@@ -26,7 +26,7 @@ import { createTRPContext, t } from "~/utils/trpcServer";
 export const appRouter = t.router({
 	login,
 	signup,
-	apply,
+	submitResume,
 	listJobs,
 	createOrganization,
 	listOrganizations,
