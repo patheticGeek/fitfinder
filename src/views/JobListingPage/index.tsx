@@ -1,7 +1,8 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CheckCircle2, Upload } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { Upload } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -21,6 +22,7 @@ interface JobListingPageProps {
 
 export function JobListingPage({ jobId }: JobListingPageProps) {
 	const { trpc } = useGlobalContext();
+	const navigate = useNavigate();
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
 	const jobQuery = useQuery(trpc.getPublicJobListing.queryOptions({ jobId }));
@@ -45,12 +47,22 @@ export function JobListingPage({ jobId }: JobListingPageProps) {
 			const base64 = (await readFileAsBase64(selectedFile)) as string;
 			const contentBase64 = base64.replace(/^data:.*;base64,/, "");
 
-			await applyMutation.mutateAsync({
+			const result = await applyMutation.mutateAsync({
 				fileName: selectedFile.name,
 				mimeType: selectedFile.type,
 				contentBase64,
 				jobId,
 			});
+
+			// Redirect to apply page with the invite code
+			if (result.inviteCode) {
+				navigate({
+					to: "/apply/$jobId/$code",
+					params: { jobId, code: result.inviteCode },
+				});
+			} else {
+				alert("Application submitted, but failed to generate invite code");
+			}
 		} catch (err) {
 			const message =
 				err instanceof Error ? err.message : "Failed to submit application";
@@ -106,50 +118,6 @@ export function JobListingPage({ jobId }: JobListingPageProps) {
 		}).format(dateObj);
 	};
 
-	if (applyMutation.data) {
-		return (
-			<div className="min-h-screen bg-background">
-				<div className="max-w-3xl mx-auto p-6 space-y-6">
-					<Card>
-						<CardHeader className="text-center space-y-4">
-							<div className="flex justify-center">
-								<CheckCircle2 className="size-16 text-primary" />
-							</div>
-							<CardTitle className="text-2xl">
-								Application Submitted Successfully!
-							</CardTitle>
-							<CardDescription className="text-base">
-								Thank you for applying to {job.title} at {job.organization.name}
-							</CardDescription>
-						</CardHeader>
-					</Card>
-
-					<Card>
-						<CardHeader>
-							<CardTitle>Your Match Score</CardTitle>
-							<CardDescription>
-								Based on your resume, here's how well you match this position:
-							</CardDescription>
-						</CardHeader>
-						<div className="p-6 space-y-4">
-							<div className="text-center">
-								<div className="text-5xl font-bold text-primary">
-									{applyMutation.data.score}
-								</div>
-								<div className="text-sm text-muted-foreground mt-2">out of 100</div>
-							</div>
-							<div className="pt-4 border-t">
-								<h3 className="font-semibold mb-2">Justification</h3>
-								<p className="text-sm text-muted-foreground whitespace-pre-wrap">
-									{applyMutation.data.scoreJustification}
-								</p>
-							</div>
-						</div>
-					</Card>
-				</div>
-			</div>
-		);
-	}
 
 	return (
 		<div className="min-h-screen bg-background">

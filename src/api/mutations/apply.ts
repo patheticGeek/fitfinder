@@ -364,6 +364,35 @@ export const applyToJob = t.procedure
 						},
 					});
 				}
+
+				// Create an invite for the candidate to complete their application
+				const inviteCode = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+				const invite = await prismaClient.invite.create({
+					data: {
+						code: inviteCode,
+						jobId,
+						resumeId,
+						// No expiration for public applications
+						expiresAt: null,
+					},
+				});
+
+				return {
+					id,
+					questions: geminiOut.interviewQuestions,
+					jobId: jobId,
+					orgId: job.organizationId,
+					resumeId: resumeRecord?.id ?? null,
+					inviteCode: invite.code,
+					education: geminiOut.education,
+					experience: geminiOut.experience,
+					projects: geminiOut.projects,
+					skills: geminiOut.skills,
+					currentLocation: geminiOut.currentLocation ?? null,
+					totalExperienceMonths: geminiOut.totalExperienceMonths ?? null,
+					email: geminiOut.email ?? null,
+					phone: geminiOut.phone ?? null,
+				};
 			} catch (e) {
 				const errMsg = (e as Error)?.message || String(e);
 				console.error(
@@ -375,24 +404,6 @@ export const applyToJob = t.procedure
 				// Re-throw so caller sees the error
 				throw e;
 			}
-
-			return {
-				id,
-				score: geminiOut.score,
-				scoreJustification: geminiOut.scoreJustification,
-				questions: geminiOut.interviewQuestions,
-				jobId: jobId,
-				orgId: job.organizationId,
-				resumeId: resumeRecord?.id ?? null,
-				education: geminiOut.education,
-				experience: geminiOut.experience,
-				projects: geminiOut.projects,
-				skills: geminiOut.skills,
-				currentLocation: geminiOut.currentLocation ?? null,
-				totalExperienceMonths: geminiOut.totalExperienceMonths ?? null,
-				email: geminiOut.email ?? null,
-				phone: geminiOut.phone ?? null,
-			};
 		} catch (err) {
 			const message = (err as Error)?.message || String(err) || "Unknown error";
 			throw new TRPCError({
