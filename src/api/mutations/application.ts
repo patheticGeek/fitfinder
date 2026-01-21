@@ -1,5 +1,8 @@
+import { GoogleGenAI } from "@google/genai";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { zodToJsonSchema } from "zod-to-json-schema";
+import type { Prisma } from "~/prisma-generated/client";
 import {
 	educationSchema,
 	experienceSchema,
@@ -7,6 +10,187 @@ import {
 } from "~/schemas/resume";
 import { prismaClient } from "~/utils/prisma";
 import { authedProcedure, t } from "~/utils/trpcServer";
+
+const ReEvaluationSchema = z.object({
+	score: z.number().min(0).max(100),
+	scoreJustification: z.string(),
+});
+
+type ResumeWithRelations = Prisma.ResumeGetPayload<{
+	select: {
+		education: true;
+		experience: true;
+		projects: true;
+		email: true;
+		phone: true;
+		currentLocation: true;
+		totalExperienceMonths: true;
+		resumeSkills: {
+			select: { skill: { select: { name: true } } };
+		};
+		questionAnswers: {
+			select: { question: true; answer: true };
+		};
+		job: {
+			select: {
+				description: true;
+				additionalInstructions: true;
+			};
+		};
+	};
+}>;
+
+async function reEvaluateCandidateWithGemini(
+	resumeData: Pick<
+		ResumeWithRelations,
+		| "education"
+		| "experience"
+		| "projects"
+		| "email"
+		| "phone"
+		| "currentLocation"
+		| "totalExperienceMonths"
+	> & {
+		skills: string[];
+	},
+	questionAnswers: Array<{ question: string; answer: string }>,
+	jobDescription: string,
+	additionalInstructions?: string | null,
+) {
+	if (!process.env.GEMINI_API_KEY) {
+		throw new Error("GEMINI_API_KEY must be set to call Gemini.");
+	}
+
+	const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+	// Format resume data as text
+	const educationText = Array.isArray(resumeData.education)
+		? resumeData.education
+				.map((e: unknown) => {
+					if (
+						typeof e === "object" &&
+						e !== null &&
+						"institution" in e
+					) {
+						const edu = e as {
+							institution?: string;
+							degree?: string;
+							fieldOfStudy?: string;
+							startDate?: string;
+							endDate?: string;
+						};
+						return `${edu.institution || ""} - ${edu.degree || ""} ${edu.fieldOfStudy || ""} ${edu.startDate || ""} to ${edu.endDate || ""}`;
+					}
+					return null;
+				})
+				.filter((text): text is string => text !== null)
+				.join("\n")
+		: "";
+
+	const experienceText = Array.isArray(resumeData.experience)
+		? resumeData.experience
+				.map((e: unknown) => {
+					if (
+						typeof e === "object" &&
+						e !== null &&
+						"company" in e
+					) {
+						const exp = e as {
+							company?: string;
+							title?: string;
+							startDate?: string;
+							endDate?: string;
+							description?: string;
+						};
+						return `${exp.company || ""} - ${exp.title || ""} ${exp.startDate || ""} to ${exp.endDate || ""}\n${exp.description || ""}`;
+					}
+					return null;
+				})
+				.filter((text): text is string => text !== null)
+				.join("\n\n")
+		: "";
+
+	const projectsText = Array.isArray(resumeData.projects)
+		? resumeData.projects
+				.map((p: unknown) => {
+					if (typeof p === "object" && p !== null && "name" in p) {
+						const proj = p as {
+							name?: string;
+							description?: string;
+						};
+						return `${proj.name || ""} - ${proj.description || ""}`;
+					}
+					return null;
+				})
+				.filter((text): text is string => text !== null)
+				.join("\n\n")
+		: "";
+
+	const skillsText = resumeData.skills.join(", ");
+
+	const resumeText = [
+		educationText && `Education:\n${educationText}`,
+		experienceText && `Experience:\n${experienceText}`,
+		projectsText && `Projects:\n${projectsText}`,
+		skillsText && `Skills: ${skillsText}`,
+		resumeData.email && `Email: ${resumeData.email}`,
+		resumeData.phone && `Phone: ${resumeData.phone}`,
+		resumeData.currentLocation && `Location: ${resumeData.currentLocation}`,
+	]
+		.filter(Boolean)
+		.join("\n\n");
+
+	// Format question answers
+	const answersText =
+		questionAnswers.length > 0
+			? questionAnswers
+					.map((qa) => `Q: ${qa.question}\nA: ${qa.answer}`)
+					.join("\n\n")
+			: "";
+
+	const additionalContext = additionalInstructions
+		? `<additional-instructions>\n${additionalInstructions}\n</additional-instructions>`
+		: "";
+
+	const prompt = `
+	Re-evaluate this candidate based on their updated resume information and their answers to interview questions.
+	Return a JSON object containing:
+	- score (0-100): Updated match score considering both the resume and their question answers
+	- scoreJustification (2-3 sentences): Explain the score, highlighting how their answers and updated information affect their fit
+
+	<resume>\n${resumeText}\n</resume>
+	<job-description>\n${jobDescription}\n</job-description>
+	${answersText ? `<candidate-answers>\n${answersText}\n</candidate-answers>` : ""}
+	${additionalContext}
+	`.trim();
+
+	try {
+		const resp = await ai.models.generateContent({
+			model: "gemini-flash-lite-latest",
+			contents: prompt,
+			config: {
+				responseMimeType: "application/json",
+				responseJsonSchema: zodToJsonSchema(ReEvaluationSchema),
+			},
+		});
+
+		const out =
+			resp?.text || resp?.candidates?.map((c) => c?.content).join("\n") || "";
+
+		if (!out) throw new Error("@google/genai returned empty output.");
+
+		const validated = ReEvaluationSchema.parse(JSON.parse(out));
+
+		return {
+			score: Math.round(validated.score),
+			scoreJustification: validated.scoreJustification,
+		};
+	} catch (e) {
+		throw new Error(
+			`@google/genai re-evaluation failed: ${(e as Error)?.message || String(e)}`,
+		);
+	}
+}
 
 export const createApplicationInvite = authedProcedure
 	.input(
@@ -181,6 +365,84 @@ export const submitApplication = t.procedure
 					data: { answer: a.answer },
 				});
 			}
+		}
+
+		// Re-evaluate candidate with AI after they've answered questions
+		try {
+			// Fetch updated resume data and job information
+			const resume: ResumeWithRelations | null =
+				await prismaClient.resume.findUnique({
+					where: { id: invite.resumeId },
+					select: {
+						education: true,
+						experience: true,
+						projects: true,
+						email: true,
+						phone: true,
+						currentLocation: true,
+						totalExperienceMonths: true,
+						resumeSkills: {
+							select: { skill: { select: { name: true } } },
+						},
+						questionAnswers: {
+							select: { question: true, answer: true },
+						},
+						job: {
+							select: {
+								description: true,
+								additionalInstructions: true,
+							},
+						},
+					},
+				});
+
+			if (resume && resume.job) {
+				const skills = resume.resumeSkills
+					.map((rs) => rs?.skill?.name || "")
+					.filter(Boolean);
+
+				// Get all question answers (including the ones just updated)
+				const questionAnswers = resume.questionAnswers
+					.filter((qa) => qa.answer && qa.answer.trim().length > 0)
+					.map((qa) => ({
+						question: qa.question,
+						answer: qa.answer!,
+					}));
+
+				// Only re-evaluate if there are question answers
+				if (questionAnswers.length > 0) {
+					const evaluation = await reEvaluateCandidateWithGemini(
+						{
+							education: resume.education,
+							experience: resume.experience,
+							projects: resume.projects,
+							skills,
+							email: resume.email,
+							phone: resume.phone,
+							currentLocation: resume.currentLocation,
+							totalExperienceMonths: resume.totalExperienceMonths,
+						},
+						questionAnswers,
+						resume.job.description,
+						resume.job.additionalInstructions ?? undefined,
+					);
+
+					// Update resume with new score and justification
+					await prismaClient.resume.update({
+						where: { id: invite.resumeId },
+						data: {
+							score: evaluation.score,
+							scoreJustification: evaluation.scoreJustification,
+						},
+					});
+				}
+			}
+		} catch (e) {
+			// Log error but don't fail the submission if re-evaluation fails
+			console.error(
+				"Failed to re-evaluate candidate after submission:",
+				(e as Error)?.message || String(e),
+			);
 		}
 
 		await prismaClient.invite.update({
