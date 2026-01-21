@@ -1,8 +1,8 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import { Upload } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft, Upload } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -17,15 +17,18 @@ import { useGlobalContext } from "~/utils/hooks";
 import { readFileAsBase64 } from "~/utils/resume";
 
 interface JobListingPageProps {
+	orgId: string;
 	jobId: string;
 }
 
-export function JobListingPage({ jobId }: JobListingPageProps) {
+export function JobListingPage({ orgId, jobId }: JobListingPageProps) {
 	const { trpc } = useGlobalContext();
 	const navigate = useNavigate();
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-	const jobQuery = useQuery(trpc.getPublicJobListing.queryOptions({ jobId }));
+	const jobQuery = useQuery(
+		trpc.getPublicJobListing.queryOptions({ orgId, jobId }),
+	);
 	const applyMutation = useMutation(trpc.applyToJob.mutationOptions());
 
 	const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,8 +60,8 @@ export function JobListingPage({ jobId }: JobListingPageProps) {
 			// Redirect to apply page with the invite code
 			if (result.inviteCode) {
 				navigate({
-					to: "/apply/$jobId/$code",
-					params: { jobId, code: result.inviteCode },
+					to: "/apply/$orgId/$jobId/$code",
+					params: { orgId, jobId, code: result.inviteCode },
 				});
 			} else {
 				alert("Application submitted, but failed to generate invite code");
@@ -122,6 +125,15 @@ export function JobListingPage({ jobId }: JobListingPageProps) {
 	return (
 		<div className="min-h-screen bg-background">
 			<div className="max-w-3xl mx-auto p-6 space-y-6">
+				<div className="flex items-center gap-4">
+					<Link to="/apply/$orgId" params={{ orgId }}>
+						<Button variant="ghost" size="sm">
+							<ArrowLeft className="size-4 mr-2" />
+							Back to Jobs
+						</Button>
+					</Link>
+				</div>
+
 				{/* Job Header */}
 				<Card>
 					<CardHeader>

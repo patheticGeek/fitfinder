@@ -1,15 +1,15 @@
 import { createFileRoute, useMatch } from "@tanstack/react-router";
 import { JobListingPage } from "~/views/JobListingPage";
 
-export const Route = createFileRoute("/job/$jobId")({
+export const Route = createFileRoute("/apply/$orgId/$jobId/")({
 	component: RouteComponent,
 });
 
 function RouteComponent() {
-	const { jobId } = useMatch({
-		from: "/job/$jobId",
+	const { orgId, jobId } = useMatch({
+		from: "/apply/$orgId/$jobId/",
 		select: (s) => s.params,
 	});
 
-	return <JobListingPage jobId={jobId} />;
+	return <JobListingPage orgId={orgId} jobId={jobId} />;
 }

@@ -20,11 +20,13 @@ import {
 	getJobCandidates,
 	getPublicJobListing,
 	listJobs,
+	listPublicJobs,
 } from "~/api/queries/jobs";
 import {
 	getOrganization,
 	getOrganizationCandidates,
 	listOrganizations,
+	listPublicOrganizations,
 } from "~/api/queries/organizations";
 import { createTRPContext, t } from "~/utils/trpcServer";
 
@@ -43,8 +45,10 @@ export const appRouter = t.router({
 	getJobCandidates,
 	getJob,
 	getPublicJobListing,
+	listPublicJobs,
 	getOrganization,
 	getOrganizationCandidates,
+	listPublicOrganizations,
 	deleteJob,
 	deleteOrg,
 	createApplicationInvite,

@@ -92,7 +92,7 @@ export const getJob = authedProcedure
 
 // Public query to get job listing details (without sensitive fields)
 export const getPublicJobListing = t.procedure
-	.input(z.object({ jobId: z.string() }))
+	.input(z.object({ orgId: z.string(), jobId: z.string() }))
 	.query(async ({ input }) => {
 		const job = await prismaClient.job.findUnique({
 			where: { id: input.jobId },
@@ -101,6 +101,7 @@ export const getPublicJobListing = t.procedure
 				title: true,
 				description: true,
 				createdAt: true,
+				organizationId: true,
 				organization: {
 					select: {
 						id: true,
@@ -114,5 +115,36 @@ export const getPublicJobListing = t.procedure
 			throw new TRPCError({ code: "NOT_FOUND", message: "Job not found" });
 		}
 
+		if (job.organizationId !== input.orgId) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: "Job does not belong to organization",
+			});
+		}
+
 		return { job };
+	});
+
+// Public query to list all jobs for an organization
+export const listPublicJobs = t.procedure
+	.input(z.object({ orgId: z.string() }))
+	.query(async ({ input }) => {
+		const jobs = await prismaClient.job.findMany({
+			where: { organizationId: input.orgId },
+			select: {
+				id: true,
+				title: true,
+				description: true,
+				createdAt: true,
+				organization: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+			},
+			orderBy: { createdAt: "desc" },
+		});
+
+		return { jobs };
 	});

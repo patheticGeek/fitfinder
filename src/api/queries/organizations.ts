@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prismaClient } from "~/utils/prisma";
-import { authedProcedure } from "~/utils/trpcServer";
+import { authedProcedure, t } from "~/utils/trpcServer";
 
 const GetOrganizationSchema = z.object({ orgId: z.string() });
 
@@ -94,3 +94,21 @@ export const getOrganizationCandidates = authedProcedure
 
 		return { resumes };
 	});
+
+// Public query to list all organizations with job counts
+export const listPublicOrganizations = t.procedure.query(async () => {
+	const orgs = await prismaClient.organization.findMany({
+		select: {
+			id: true,
+			name: true,
+			_count: {
+				select: {
+					jobs: true,
+				},
+			},
+		},
+		orderBy: { name: "asc" },
+	});
+
+	return { orgs };
+});
