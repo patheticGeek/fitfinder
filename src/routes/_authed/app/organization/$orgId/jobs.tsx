@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useMatch } from "@tanstack/react-router";
+import { Copy, Check } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardHeader } from "~/components/ui/card";
@@ -26,6 +27,7 @@ function JobsPage() {
 	const [jobDesc, setJobDesc] = useState("");
 	const [additionalInstructions, setAdditionalInstructions] = useState("");
 	const [suggestedQuestions, setSuggestedQuestions] = useState("");
+	const [copiedJobId, setCopiedJobId] = useState<string | null>(null);
 
 	const createJobMutation = useMutation(trpc.createJob.mutationOptions());
 	const deleteJobMutation = useMutation(trpc.deleteJob.mutationOptions());
@@ -33,6 +35,17 @@ function JobsPage() {
 	function refresh() {
 		q.refetch();
 	}
+
+	const copyJobLink = async (jobId: string) => {
+		const jobLink = `${window.location.origin}/job/${jobId}`;
+		try {
+			await navigator.clipboard.writeText(jobLink);
+			setCopiedJobId(jobId);
+			setTimeout(() => setCopiedJobId(null), 2000);
+		} catch (err) {
+			alert("Failed to copy link. Please copy manually: " + jobLink);
+		}
+	};
 
 	return (
 		<div className="max-w-5xl">
@@ -182,6 +195,24 @@ function JobsPage() {
 											</div>
 										</div>
 										<div className="flex items-center gap-2 shrink-0">
+											<Button
+												size="sm"
+												variant="outline"
+												onClick={() => copyJobLink(j.id)}
+												title="Copy job link"
+											>
+												{copiedJobId === j.id ? (
+													<>
+														<Check className="size-4 mr-1" />
+														Copied
+													</>
+												) : (
+													<>
+														<Copy className="size-4 mr-1" />
+														Copy Link
+													</>
+												)}
+											</Button>
 											<Link
 												to="/app/organization/$orgId/candidates"
 												params={{ orgId }}

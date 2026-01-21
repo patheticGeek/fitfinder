@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prismaClient } from "~/utils/prisma";
-import { authedProcedure } from "~/utils/trpcServer";
+import { authedProcedure, t } from "~/utils/trpcServer";
 
 const GetJobCandidatesSchema = z.object({
 	orgId: z.string(),
@@ -85,6 +85,33 @@ export const getJob = authedProcedure
 
 		if (!membership || !membership.isAdmin) {
 			throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
+		}
+
+		return { job };
+	});
+
+// Public query to get job listing details (without sensitive fields)
+export const getPublicJobListing = t.procedure
+	.input(z.object({ jobId: z.string() }))
+	.query(async ({ input }) => {
+		const job = await prismaClient.job.findUnique({
+			where: { id: input.jobId },
+			select: {
+				id: true,
+				title: true,
+				description: true,
+				createdAt: true,
+				organization: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+			},
+		});
+
+		if (!job) {
+			throw new TRPCError({ code: "NOT_FOUND", message: "Job not found" });
 		}
 
 		return { job };

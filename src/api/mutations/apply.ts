@@ -12,7 +12,7 @@ import {
 	skillSchema,
 } from "~/schemas/resume";
 import { prismaClient } from "~/utils/prisma";
-import { authedProcedure } from "~/utils/trpcServer";
+import { authedProcedure, t } from "~/utils/trpcServer";
 
 const ApplySchema = z.object({
 	fileName: z.string().min(1),
@@ -61,16 +61,16 @@ async function generateMatchAndQuestionsWithGemini(
 	- score (0-100)
 	- scoreJustification (2-3 sentences)
 	- interviewQuestions (array of ~5 short questions with optional topic, confidence [0-1], and optional correctAnswer)
-	- education (array of entries: institution, optional degree, field, startDate, endDate, location, do not change or paraphrase - use exact text from resume)
-	- experience (array of entries: company, optional title, startDate, endDate, summary, location,  do not change or paraphrase - use exact text from resume)
-	- projects (array of entries: name, optional description, technologies[], these are side projects, don't mention projects done in experience, do not change or paraphrase - use exact text from resume)
+	- education (array of entries: institution, optional degree, optional field, optional startDate, optional endDate, optional location, do not change or paraphrase - use exact text from resume)
+	- experience (array of entries: company, optional title, optional startDate, optional endDate, optional summary, optional location, do not change or paraphrase - use exact text from resume)
+	- projects (array of entries: name, optional description, optional technologies[], these are side projects, don't mention projects done in experience, do not change or paraphrase - use exact text from resume)
 	- skills (array of entries: name, optional level one of beginner|intermediate|expert)
 	- currentLocation (optional, if no location mentioned explicitly - use the last job's location)
 	- totalExperienceMonths (optional integer)
 	- email (optional, extracted candidate email address)
 	- phone (optional, extracted candidate phone number)
 
-	Make sure dates are in the format YYYY-MM-DD and are valid dates. If no day give, use the first day of the month.
+	Make sure dates are in the format YYYY-MM-DD and are valid dates. If no day is given, use the first day of the month. If dates are not available in the resume, omit them (do not include the field).
 
 	<resume>\n${resumeText}\n</resume>
 	<job-description>\n${jobDescription}\n</job-description>
@@ -238,6 +238,152 @@ export const submitResume = authedProcedure
 				orgId: orgId ?? null,
 				resumeId: resumeRecord?.id ?? null,
 				// expose structured fields optionally for UI/inspections
+				education: geminiOut.education,
+				experience: geminiOut.experience,
+				projects: geminiOut.projects,
+				skills: geminiOut.skills,
+				currentLocation: geminiOut.currentLocation ?? null,
+				totalExperienceMonths: geminiOut.totalExperienceMonths ?? null,
+				email: geminiOut.email ?? null,
+				phone: geminiOut.phone ?? null,
+			};
+		} catch (err) {
+			const message = (err as Error)?.message || String(err) || "Unknown error";
+			throw new TRPCError({
+				code: "INTERNAL_SERVER_ERROR",
+				message,
+			});
+		}
+	});
+
+// Public mutation to apply to a job (no auth required, evaluates immediately)
+// Note: additionalInstructions and suggestedQuestions are used for AI evaluation but NOT returned to frontend
+export const applyToJob = t.procedure
+	.input(
+		z.object({
+			fileName: z.string().min(1),
+			mimeType: z.string().regex(/^application\/pdf$/i),
+			contentBase64: z.string().min(20),
+			jobId: z.string().min(1),
+		}),
+	)
+	.mutation(async ({ input }) => {
+		try {
+			const { fileName, contentBase64, jobId } = input;
+
+			// Fetch the job to get description and AI evaluation fields
+			const job = await prismaClient.job.findUnique({
+				where: { id: jobId },
+				select: {
+					id: true,
+					description: true,
+					organizationId: true,
+					additionalInstructions: true,
+					suggestedQuestions: true,
+				},
+			});
+
+			if (!job) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Job not found",
+				});
+			}
+
+			const buf = Buffer.from(contentBase64, "base64");
+			const pdf = await pdfParse(buf);
+			const text = (pdf.text || "").replace(/\s+/g, " ").trim();
+
+			// Call Gemini WITH additionalInstructions and suggestedQuestions for better evaluation
+			const geminiOut = await generateMatchAndQuestionsWithGemini(
+				text,
+				job.description,
+				job.additionalInstructions ?? undefined,
+				job.suggestedQuestions ?? undefined,
+			);
+
+			const id = crypto.randomUUID();
+
+			let resumeRecord: Resume | null = null;
+			try {
+				// Persist resume without a user (public application)
+				resumeRecord = await prismaClient.resume.create({
+					data: {
+						fileName,
+						score: geminiOut.score,
+						scoreJustification: geminiOut.scoreJustification,
+						education: geminiOut.education,
+						experience: geminiOut.experience,
+						projects: geminiOut.projects,
+						currentLocation: geminiOut.currentLocation ?? undefined,
+						totalExperienceMonths: geminiOut.totalExperienceMonths ?? undefined,
+						email: geminiOut.email ?? undefined,
+						phone: geminiOut.phone ?? undefined,
+						addedByUserId: null, // Public application, no user
+						jobId: jobId,
+						organizationId: job.organizationId,
+					},
+				});
+
+				const resumeId = resumeRecord.id;
+
+				// Create questions separately
+				if (
+					geminiOut.interviewQuestions &&
+					geminiOut.interviewQuestions.length > 0
+				) {
+					await prismaClient.questionAnswer.createMany({
+						data: geminiOut.interviewQuestions.map((q) => ({
+							resumeId,
+							question: q.text,
+							answer: null,
+						})),
+					});
+				}
+
+				// Create skills separately
+				const skillNames = Array.from(
+					new Set(
+						(geminiOut.skills ?? [])
+							.map((s) => (s.name || "").trim())
+							.filter((name) => name.length > 0),
+					),
+				);
+
+				for (const skillName of skillNames) {
+					const skill = await prismaClient.skill.upsert({
+						where: { name: skillName },
+						update: {},
+						create: { name: skillName },
+					});
+
+					await prismaClient.resumeSkill.create({
+						data: {
+							resumeId,
+							skillId: skill.id,
+						},
+					});
+				}
+			} catch (e) {
+				const errMsg = (e as Error)?.message || String(e);
+				console.error(
+					"Failed to persist resume record:",
+					errMsg,
+					"\nFull error:",
+					e,
+				);
+				// Re-throw so caller sees the error
+				throw e;
+			}
+
+			return {
+				id,
+				score: geminiOut.score,
+				scoreJustification: geminiOut.scoreJustification,
+				questions: geminiOut.interviewQuestions,
+				jobId: jobId,
+				orgId: job.organizationId,
+				resumeId: resumeRecord?.id ?? null,
 				education: geminiOut.education,
 				experience: geminiOut.experience,
 				projects: geminiOut.projects,

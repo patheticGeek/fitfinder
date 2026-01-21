@@ -5,7 +5,7 @@ import {
 	createApplicationInvite,
 	submitApplication,
 } from "~/api/mutations/application";
-import { submitResume } from "~/api/mutations/apply";
+import { applyToJob, submitResume } from "~/api/mutations/apply";
 import { login, signup } from "~/api/mutations/auth";
 import { createJob, deleteJob, updateJob } from "~/api/mutations/jobs";
 import {
@@ -15,7 +15,12 @@ import {
 	deleteOrg,
 } from "~/api/mutations/organizations";
 import { getApplicationDetails } from "~/api/queries/application";
-import { getJob, getJobCandidates, listJobs } from "~/api/queries/jobs";
+import {
+	getJob,
+	getJobCandidates,
+	getPublicJobListing,
+	listJobs,
+} from "~/api/queries/jobs";
 import {
 	getOrganization,
 	getOrganizationCandidates,
@@ -27,6 +32,7 @@ export const appRouter = t.router({
 	login,
 	signup,
 	submitResume,
+	applyToJob,
 	listJobs,
 	createOrganization,
 	listOrganizations,
@@ -36,6 +42,7 @@ export const appRouter = t.router({
 	updateJob,
 	getJobCandidates,
 	getJob,
+	getPublicJobListing,
 	getOrganization,
 	getOrganizationCandidates,
 	deleteJob,

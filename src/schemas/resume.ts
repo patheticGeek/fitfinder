@@ -1,23 +1,33 @@
 import { z } from "zod";
 
-const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
-	message: "Date must be in YYYY-MM-DD format",
-});
+// Date schema that accepts YYYY-MM-DD format, empty strings (converted to undefined), or undefined
+const dateSchema = z.preprocess(
+	(val) => {
+		if (val === "" || val === null || val === undefined) return undefined;
+		return val;
+	},
+	z
+		.string()
+		.regex(/^\d{4}-\d{2}-\d{2}$/, {
+			message: "Date must be in YYYY-MM-DD format",
+		})
+		.optional(),
+);
 
 export const educationSchema = z.object({
 	institution: z.string(),
 	degree: z.string().optional(),
 	field: z.string().optional(),
-	startDate: dateSchema.optional(),
-	endDate: dateSchema.optional(),
+	startDate: dateSchema,
+	endDate: dateSchema,
 	location: z.string().optional(),
 });
 
 export const experienceSchema = z.object({
 	company: z.string(),
 	title: z.string().optional(),
-	startDate: dateSchema.optional(),
-	endDate: dateSchema.optional(),
+	startDate: dateSchema,
+	endDate: dateSchema,
 	summary: z.string().optional(),
 	location: z.string().optional(),
 });
