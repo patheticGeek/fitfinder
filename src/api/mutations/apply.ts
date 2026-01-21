@@ -61,16 +61,16 @@ async function generateMatchAndQuestionsWithGemini(
 	- score (0-100)
 	- scoreJustification (2-3 sentences)
 	- interviewQuestions (array of ~5 short questions with optional topic, confidence [0-1], and optional correctAnswer)
-	- education (array of entries: institution, optional degree, optional field, optional startDate, optional endDate, optional location, do not change or paraphrase - use exact text from resume)
-	- experience (array of entries: company, optional title, optional startDate, optional endDate, optional summary, optional location, do not change or paraphrase - use exact text from resume)
-	- projects (array of entries: name, optional description, optional technologies[], these are side projects, don't mention projects done in experience, do not change or paraphrase - use exact text from resume)
+	- education (array of entries: do not change or paraphrase - use exact text from resume)
+	- experience (array of entries: do not change or paraphrase - use exact text from resume)
+	- projects (array of entries: don't mention projects done in experience, instead side projects or personal projects, do not change or paraphrase - use exact text from resume)
 	- skills (array of entries: name, optional level one of beginner|intermediate|expert)
-	- currentLocation (optional, if no location mentioned explicitly - use the last job's location)
+	- currentLocation (optional, if no location mentioned explicitly - use the last experience/jobs's location)
 	- totalExperienceMonths (optional integer)
 	- email (optional, extracted candidate email address)
 	- phone (optional, extracted candidate phone number)
 
-	Make sure dates are in the format YYYY-MM-DD and are valid dates. If no day is given, use the first day of the month. If dates are not available in the resume, omit them (do not include the field).
+	Make sure dates are in the format YYYY-MM-DD and are valid dates or is exactly "Present" for current. If no day is given, use the first day of the month. If dates are not available in the resume, omit them (do not include the field).
 
 	<resume>\n${resumeText}\n</resume>
 	<job-description>\n${jobDescription}\n</job-description>

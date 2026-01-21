@@ -8,7 +8,7 @@ const dateSchema = z.preprocess(
 	},
 	z
 		.string()
-		.regex(/^\d{4}-\d{2}-\d{2}$/, {
+		.regex(/^(\d{4}-\d{2}-\d{2})|Present$/, {
 			message: "Date must be in YYYY-MM-DD format",
 		})
 		.optional(),
