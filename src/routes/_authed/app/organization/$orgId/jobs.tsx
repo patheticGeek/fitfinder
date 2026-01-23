@@ -37,7 +37,7 @@ function JobsPage() {
 	}
 
 	const copyJobLink = async (jobId: string) => {
-		const jobLink = `${window.location.origin}/job/${jobId}`;
+		const jobLink = `${window.location.origin}/apply/${orgId}/${jobId}`;
 		try {
 			await navigator.clipboard.writeText(jobLink);
 			setCopiedJobId(jobId);
